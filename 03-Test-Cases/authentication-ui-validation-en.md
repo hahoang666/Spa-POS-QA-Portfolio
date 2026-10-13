@@ -1,0 +1,51 @@
+# Authentication — UI & Validation Test Cases (English)
+
+**Application:** [Spa POS](https://hahoang666.github.io/Spa-pos-pp/)  
+**Source baseline:** [Requirement Baseline v1.0](https://github.com/hahoang666/Spa-pos-pp/blob/main/docs/REQUIREMENT_BASELINE_V1.0.md)  
+**Frontend reviewed:** [index.html](https://github.com/hahoang666/Spa-pos-pp/blob/main/index.html)  
+**Prepared:** 13 October 2026  
+**Execution status:** ALL NOT RUN — static code review is not test execution.
+
+## Preconditions
+Use only authorized disposable test accounts. Do not share passwords, JWTs or access tokens. For account lock scenarios, arrange a reset method before testing. Use Chrome desktop; record mobile device/browser separately.
+
+## Test case register
+
+Test Case ID | Requirement ID | Test Type | Scenario | Steps / Test Data | Expected Result | Priority | Actual Result | Status | Defect ID | Evidence | Build / Date
+--- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
+AUTH-UI-01 | AUTH-01 | UI | Login form components | Open login page | Username/password labels and fields, password masked, remember checkbox and login button visible | Low |  | NOT RUN |  |  | 
+AUTH-UI-02 | AUTH-01 | UI | Password visibility toggle | Enter non-sensitive dummy text; click eye icon twice | Input switches password → text → password without changing value | Medium |  | NOT RUN |  |  | 
+AUTH-UI-03 | AUTH-01 | UI | Keyboard interaction | Navigate with Tab, Shift+Tab, Enter | Logical focus order, visible focus and Enter submits form | Medium |  | NOT RUN |  |  | 
+AUTH-UI-04 | AUTH-01 | UI | Responsive layout | Inspect desktop and mobile viewport | No clipped controls, horizontal overflow or overlapping elements | Medium |  | NOT RUN |  |  | 
+AUTH-UI-05 | AUTH-05 | UI | Security information message | Open login screen | Display baseline message: Không lưu thông tin đăng nhập trên thiết bị | Medium |  | NOT RUN |  |  | 
+AUTH-UI-06 | AUTH-04 | UI | Logout screen and content | Login with test account; logout | Login shown; app content and menus cleared | High |  | NOT RUN |  |  | 
+AUTH-VAL-01 | AUTH-01 | Validation | Both fields empty | Leave username/password empty; submit | Username required error appears at username field; no login | High |  | NOT RUN |  |  | 
+AUTH-VAL-02 | AUTH-01 | Validation | Username empty | Enter dummy password; leave username blank; submit | Username required error; no login | High |  | NOT RUN |  |  | 
+AUTH-VAL-03 | AUTH-01 | Validation | Password empty | Enter test username; leave password blank; submit | Password required error; no login | High |  | NOT RUN |  |  | 
+AUTH-VAL-04 | AUTH-01 | Validation | Invalid credentials | Enter non-existent test username and wrong password; submit | Generic invalid credentials message plus remaining attempts per baseline; no login | High |  | NOT RUN |  |  | 
+AUTH-VAL-05 | AUTH-01 | Validation | Case-insensitive username | Login with valid test username in different case | Same valid test account can authenticate | Medium |  | NOT RUN |  |  | 
+AUTH-VAL-06 | AUTH-01 | Validation | Leading/trailing username spaces | Add spaces around valid test username; enter correct password | Username trimmed according to current implementation; authentication succeeds | Medium |  | NOT RUN |  |  | 
+AUTH-VAL-07 | AUTH-02 | Validation | Temporary lock after five failures | Use disposable test account; submit wrong password five times | 15-minute lock, remaining time displayed; later valid password rejected during lock | High |  | NOT RUN |  |  | 
+AUTH-VAL-08 | AUTH-02 | Validation | Failed-attempt counter reset | With disposable account, fail fewer than five times; login successfully; fail again | Counter resets after successful login | High |  | NOT RUN |  |  | 
+AUTH-VAL-09 | AUTH-03 | Validation | Manually locked account | Admin manually locks test account; attempt login | Login denied; message Tài khoản đã bị khóa | High |  | NOT RUN |  |  | 
+AUTH-VAL-10 | AUTH-04 | Validation | Back and reload after logout | Login; logout; browser Back and Reload | Cannot access protected app without authentication | High |  | NOT RUN |  |  | 
+AUTH-VAL-11 | AUTH-05 | Validation | Remember username only | Check remember username; login; logout/reload | Username retained when selected; password not retained | Medium |  | NOT RUN |  |  | 
+AUTH-VAL-12 | AUTH-05 | Validation | Do not remember username | Uncheck remember; login; logout/reload | Username not retained; password not retained | Medium |  | NOT RUN |  |  | 
+AUTH-VAL-13 | AUTH-05 | Validation | Local storage and session privacy | Inspect DevTools Application > Storage after login and logout | No plaintext password stored; session handling consistent with agreed baseline | High |  | NOT RUN |  |  | 
+AUTH-VAL-14 | AUTH-01 | Validation | Valid credentials | Login using authorized test account | Successful authentication; dashboard displayed | High |  | NOT RUN |  |  | 
+AUTH-VAL-15 | AUTH-01 | Validation | Backend unavailable | Use controlled offline/devtools test, not production outage | Helpful error; no unauthorized access; submit button recovers | Medium |  | NOT RUN |  |  | 
+
+## Code-review observations (not execution results)
+- Login form exposes username, password, password toggle, remember-username checkbox and submit button.
+- `login()` trims username, validates empty fields and authenticates through Supabase Auth.
+- `login()` displays a generic invalid-credentials message; baseline also requires remaining-attempt count.
+- Current visible `login()` code does not itself show a five-failure lock timer; verify backend behavior before filing a defect.
+- `restoreSupabaseSession()` attempts to restore an existing session. Review AUTH-05 wording alongside intended remember-username behavior.
+- The baseline's security message is not shown in the login form excerpt. Verify rendered UI and record evidence.
+- Password toggle is implemented; keyboard accessibility and mobile layout still require browser execution.
+
+## Execution instructions
+For each test, fill **Actual Result** with exactly what appeared, **Status** as PASS/FAIL/BLOCKED/NOT RUN, and add browser/build/date plus screenshot reference. For FAIL, create a defect with reproducible steps. Do not record a code-review hypothesis as a confirmed defect.
+
+## Suggested first batch
+AUTH-UI-01, AUTH-UI-02, AUTH-UI-03, AUTH-VAL-01, AUTH-VAL-02, AUTH-VAL-03, AUTH-VAL-04. Perform temporary-lock testing only with a disposable account to avoid disrupting normal access.
