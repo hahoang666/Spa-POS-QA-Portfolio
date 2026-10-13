@@ -4,7 +4,7 @@
 **Yêu cầu nguồn:** [Requirement Baseline v1.0](https://github.com/hahoang666/Spa-pos-pp/blob/main/docs/REQUIREMENT_BASELINE_V1.0.md)  
 **Mã giao diện đã đọc:** [index.html](https://github.com/hahoang666/Spa-pos-pp/blob/main/index.html)  
 **Ngày soạn:** 13/10/2026  
-**Trạng thái:** TẤT CẢ CHƯA CHẠY — đọc mã nguồn không thay thế kiểm thử thực tế.
+**Trạng thái:** AUTH-UI-01 ĐẠT (ảnh chụp đã đối chiếu, Console theo người kiểm thử); các ca còn lại CHƯA CHẠY.
 
 ## Điều kiện thực hiện
 Dùng tài khoản thử được cấp phép; không gửi mật khẩu hoặc mã truy cập. Với ca khóa tài khoản, chuẩn bị tài khoản riêng và phương án mở khóa trước khi thử. Ghi rõ trình duyệt, phiên bản, ngày và ảnh chụp.
@@ -13,7 +13,7 @@ Dùng tài khoản thử được cấp phép; không gửi mật khẩu hoặc 
 
 Mã ca kiểm thử | Mã yêu cầu | Loại kiểm thử | Tình huống | Bước thực hiện / dữ liệu thử | Kết quả mong đợi | Mức ưu tiên | Kết quả thực tế | Trạng thái | Mã lỗi | Bằng chứng | Phiên bản / Ngày
 --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
-AUTH-UI-01 | AUTH-01 | Giao diện | Thành phần màn hình đăng nhập | Mở trang đăng nhập | Hiển thị nhãn và ô tên đăng nhập/mật khẩu, mật khẩu được che, ô ghi nhớ và nút Đăng nhập | Thấp |  | CHƯA CHẠY |  |  | 
+AUTH-UI-01 | AUTH-01 | Giao diện | Thành phần màn hình đăng nhập | Mở trang đăng nhập | Hiển thị nhãn và ô tên đăng nhập/mật khẩu, mật khẩu được che, ô ghi nhớ và nút Đăng nhập | Thấp | Màn hình hiển thị đủ tên đăng nhập, mật khẩu, nút hiện/ẩn, ô ghi nhớ và nút Đăng nhập; mật khẩu được che mặc định, không chồng lấn. Người kiểm thử báo cáo Console không lỗi. | ĐẠT |  | Ảnh chụp người dùng cung cấp: image(9).png (đính kèm hội thoại, chưa lưu vào GitHub). Console theo báo cáo người kiểm thử. | 2026-10-13; build not recorded
 AUTH-UI-02 | AUTH-01 | Giao diện | Hiện/ẩn mật khẩu | Nhập chuỗi giả; nhấn biểu tượng hiện/ẩn hai lần | Mật khẩu chuyển ẩn → hiện → ẩn mà không thay đổi giá trị | Trung bình |  | CHƯA CHẠY |  |  | 
 AUTH-UI-03 | AUTH-01 | Giao diện | Thao tác bằng bàn phím | Dùng Tab, Shift+Tab và Enter | Thứ tự focus hợp lý, thấy focus và Enter gửi biểu mẫu | Trung bình |  | CHƯA CHẠY |  |  | 
 AUTH-UI-04 | AUTH-01 | Giao diện | Giao diện theo kích thước màn hình | Kiểm tra màn hình máy tính và điện thoại | Không tràn ngang, che khuất hoặc chồng lấn thành phần | Trung bình |  | CHƯA CHẠY |  |  | 
