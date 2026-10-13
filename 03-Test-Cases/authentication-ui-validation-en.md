@@ -4,7 +4,7 @@
 **Source baseline:** [Requirement Baseline v1.0](https://github.com/hahoang666/Spa-pos-pp/blob/main/docs/REQUIREMENT_BASELINE_V1.0.md)  
 **Frontend reviewed:** [index.html](https://github.com/hahoang666/Spa-pos-pp/blob/main/index.html)  
 **Prepared:** 13 October 2026  
-**Execution status:** ALL NOT RUN — static code review is not test execution.
+**Execution status:** AUTH-UI-01 PASS (tester-reported, screenshot reviewed); remaining cases NOT RUN.
 
 ## Preconditions
 Use only authorized disposable test accounts. Do not share passwords, JWTs or access tokens. For account lock scenarios, arrange a reset method before testing. Use Chrome desktop; record mobile device/browser separately.
@@ -13,7 +13,7 @@ Use only authorized disposable test accounts. Do not share passwords, JWTs or ac
 
 Test Case ID | Requirement ID | Test Type | Scenario | Steps / Test Data | Expected Result | Priority | Actual Result | Status | Defect ID | Evidence | Build / Date
 --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---
-AUTH-UI-01 | AUTH-01 | UI | Login form components | Open login page | Username/password labels and fields, password masked, remember checkbox and login button visible | Low |  | NOT RUN |  |  | 
+AUTH-UI-01 | AUTH-01 | UI | Login form components | Open login page | Username/password labels and fields, password masked, remember checkbox and login button visible | Low | Login screen displays username, password, visibility toggle, Remember Username checkbox and Login button; password masked by default; no visual overlap. No console errors reported by tester. | PASS |  | User-provided screenshot: image(9).png (chat attachment; not committed to repository). Console result is tester-reported. | 2026-10-13; build not recorded
 AUTH-UI-02 | AUTH-01 | UI | Password visibility toggle | Enter non-sensitive dummy text; click eye icon twice | Input switches password → text → password without changing value | Medium |  | NOT RUN |  |  | 
 AUTH-UI-03 | AUTH-01 | UI | Keyboard interaction | Navigate with Tab, Shift+Tab, Enter | Logical focus order, visible focus and Enter submits form | Medium |  | NOT RUN |  |  | 
 AUTH-UI-04 | AUTH-01 | UI | Responsive layout | Inspect desktop and mobile viewport | No clipped controls, horizontal overflow or overlapping elements | Medium |  | NOT RUN |  |  | 
