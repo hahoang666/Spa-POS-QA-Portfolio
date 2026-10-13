@@ -25,6 +25,14 @@ Invoices, payments, returns/refunds, appointments, products, employee management
 - [Screenshots](10-Screenshots/)
 - [Vietnamese Reference](Vietnamese-Reference/)
 
+
+## Reviewed Postman & Supabase evidence (13 October 2026)
+
+- [English — API & SQL Test Execution (17 historical cases)](08-API-Testing-Postman/qa-execution-reviewed-en.md)
+- [Tiếng Việt — Báo cáo kiểm thử API và SQL](Vietnamese-Reference/bao-cao-kiem-thu-api-sql.md)
+
+These reviewed reports separate observed API results from missing SQL verification. The original Excel workbooks are not yet uploaded to this repository.
+
 ## Selected historical tests
 - HD00000004 — invoice cancellation status synchronized after frontend fix.
 - HD00000009 — return reversal, refund and cashbook validation.
