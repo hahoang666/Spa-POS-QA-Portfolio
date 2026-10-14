@@ -71,3 +71,12 @@
 - **SQL baseline and post-test:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
 - **Console observation:** `index.ts.js:5 {error: "SOURCE_LANG_VI"}`; source not yet established, not attributed to the app.
 - **Scope limitation:** Backend-side overpayment rejection via direct RPC/API remains unverified.
+
+
+## REG-SALE-06 — Reject zero and negative debt collection (2026-10-14)
+
+- **Result:** PASS (UI validation and SQL reconciliation); direct API enforcement not yet tested.
+- **Invoice:** HD00000008, invoice id 8, outstanding debt 40000.
+- **Actions:** Entered `0` and `-1000` as collection amounts and clicked Collect Debt separately. Both attempts displayed “Số tiền thu không hợp lệ.”; outstanding debt remained 40000.
+- **Post-test SQL matched baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
+- **Limitation:** Direct RPC `create_payment` validation for invalid amounts remains untested.
