@@ -139,3 +139,11 @@
 - **API:** POST /rest/v1/rpc/create_payment with invoice_id=8, payment_method_id=2, amount=1000, note RETEST-SALE-011-01-CASHIER returned HTTP 200. Created payment id=13, shift_id=6.
 - **SQL:** Invoice HD00000008 remains PARTIALLY_PAID; paid_amount=71000 (was 70000), due_amount=39000 (was 40000); payment_count=2, payment_sum=71000; cashbook_count=2, cashbook_in_sum=71000 (previously 1/70000 each).
 - **Defect DEF-SALE-011:** FIXED / pending final verification; cashier collection of old debt and EMPLOYEE permission regression remain NOT RUN. Original REG-SALE-11 FAIL retained as historical evidence.
+
+
+### RETEST-SALE-011-02 — CASHIER collects outstanding debt via UI (2026-10-14)
+
+- **Result: PASS (UI and SQL).** Logged in as CASHIER; invoice HD00000008 and Collect Debt button visible. Collected 1,000 VND through the Spa POS UI; UI reported Supabase synchronization and no console errors.
+- **SQL baseline → actual:** PARTIALLY_PAID → PARTIALLY_PAID; paid_amount 71000 → 72000; due_amount 39000 → 38000; payment_count 2 → 3; payment_sum 71000 → 72000; cashbook_count 2 → 3; cashbook_in_sum 71000 → 72000.
+- **Reconciliation:** 72000 + 38000 = invoice total 110000; payment sum equals cashbook IN sum.
+- **DEF-SALE-011:** FIXED / pending REG-SALE-12 EMPLOYEE authorization regression before CLOSED. Original REG-SALE-11 FAIL retained.
