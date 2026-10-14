@@ -100,3 +100,14 @@
 - **Response:** HTTP `400 Bad Request`, code `22023`, message `Payment amount must be greater than 0`.
 - **Post-request SQL matched baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
 - **Verdict:** Backend rejected zero payment without new financial records. Negative payment API case remains untested.
+
+
+## REG-SALE-09 — Backend rejects negative payment (2026-10-14)
+
+- **Result:** PASS — Postman RPC rejection and SQL reconciliation.
+- **Fixture:** HD00000008, invoice id 8, due 40000.
+- **Request:** `POST /rest/v1/rpc/create_payment`, `p_invoice_id=8`, `p_payment_method_id=2`, `p_amount=-1000`, `p_notes=REG-SALE-09-NEGATIVE-AMOUNT`.
+- **Response:** HTTP `400 Bad Request`, code `22023`, message `Payment amount must be greater than 0`.
+- **Post-request SQL matched baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
+- **Regression summary:** REG-SALE-05 through REG-SALE-09: **5/5 PASS** within tested scope.
+- **Limitations:** Concurrency, system failure handling, and all permission/error paths not yet tested.
