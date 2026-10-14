@@ -111,3 +111,13 @@
 - **SQL sau API so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
 - **Tổng hợp Regression:** REG-SALE-05, REG-SALE-06, REG-SALE-07, REG-SALE-08, REG-SALE-09: **5/5 PASS** trong phạm vi đã kiểm thử.
 - **Giới hạn:** Chưa kiểm thử race condition, API lỗi hệ thống, đồng thời nhiều request hoặc tất cả nhánh quyền.
+
+
+## REG-SALE-10 — Phân quyền API create_payment (14/10/2026)
+
+- **Kết quả:** PASS — kiểm tra phân quyền và đối soát SQL.
+- **Quyền:** `PAYMENT_CREATE`: ADMIN = GRANTED; CASHIER = NOT_GRANTED; EMPLOYEE = NOT_GRANTED (SQL đối chiếu `roles`, `permissions`, `role_permissions`).
+- **Tài khoản thử:** `employee01` (EMPLOYEE), gọi `POST /rest/v1/rpc/create_payment` với `p_invoice_id=8`, `p_payment_method_id=2`, `p_amount=1000`, `p_notes=REG-SALE-10-UNAUTHORIZED`.
+- **Response:** HTTP `403 Forbidden`, PostgreSQL code `42501`, message `FORBIDDEN: missing permission PAYMENT_CREATE`.
+- **SQL sau request so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không đổi.
+- **Kết luận:** EMPLOYEE không thể tạo thanh toán trái quyền và không ghi dữ liệu. **Cần rà soát yêu cầu nghiệp vụ CASHIER** vì vai trò này cũng đang thiếu `PAYMENT_CREATE`; chưa kết luận đó là defect nếu chưa đối chiếu baseline.
