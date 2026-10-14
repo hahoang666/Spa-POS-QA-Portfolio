@@ -71,3 +71,12 @@
 - **SQL trước và sau:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
 - **Quan sát Console:** `index.ts.js:5 {error: "SOURCE_LANG_VI"}`; chưa xác định liên quan ứng dụng hay tiện ích trình duyệt, không tính là defect của luồng này.
 - **Giới hạn:** Chưa xác minh backend tự chặn overpayment khi gọi RPC/API trực tiếp.
+
+
+## REG-SALE-06 — Chặn thu nợ bằng 0 và số âm (14/10/2026)
+
+- **Kết quả:** PASS (UI validation và đối soát dữ liệu); chưa kiểm thử API trực tiếp.
+- **Hóa đơn:** HD00000008, invoice id 8, còn nợ 40000.
+- **Thao tác:** Nhập `0` và `-1000` vào số tiền thu, lần lượt nhấn Thu nợ. Cả hai lần UI đều hiển thị “Số tiền thu không hợp lệ.”; công nợ vẫn 40000.
+- **SQL sau kiểm thử so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
+- **Giới hạn:** Chưa chứng minh RPC `create_payment` tự từ chối số tiền không hợp lệ nếu gọi trực tiếp.
