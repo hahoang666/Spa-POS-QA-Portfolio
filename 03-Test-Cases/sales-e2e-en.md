@@ -162,3 +162,19 @@
 - **Retest:** RETEST-SALE-011-01 PASS (cashier API payment, HTTP 200 and invoice/payment/cashbook reconciled); RETEST-SALE-011-02 PASS (cashier UI debt collection, SQL reconciled).
 - **Regression:** REG-SALE-12 PASS: EMPLOYEE remains unauthorized and financial data unchanged.
 - **Final status:** CLOSED / Verified Fixed. Severity: Major; Priority: High.
+
+
+### REG-SALE-13 — Duplicate payment on identical API retry (2026-10-14)
+
+- **Result: FAIL.** Business rule confirmed: retrying the same payment request must not create a second transaction; two independent payment requests are allowed if all payment conditions hold.
+- **Baseline invoice HD00000008 (id=8):** paid=72000, due=38000, payment_count=3, cashbook_count=3.
+- **Request 1:** POST /rest/v1/rpc/create_payment, payment_method_id=2, amount=1000, reference_no=REG-SALE-13-DUP-001, notes=REG-SALE-13-FIRST-REQUEST. HTTP 200, payment id=15. SQL: paid=73000, due=37000, payment_count=4, payment_sum=73000, cashbook_count=4, cashbook_in_sum=73000.
+- **Request 2:** Exact same payload sent again. HTTP 200, new payment id=16. SQL: paid=74000, due=36000, payment_count=5, payment_sum=74000, cashbook_count=5, cashbook_in_sum=74000.
+- **Expected:** Second request is recognized as a retry and does not create another payment or cashbook entry. **Actual:** Both requests recorded separately, resulting in an extra 1000 payment and cashbook IN.
+
+### DEF-SALE-013 — Duplicate Payment Created When Retrying Identical API Request
+
+- **Status:** OPEN. **Severity:** Major. **Priority:** High. **Related test:** REG-SALE-13 FAIL.
+- **Root-cause evidence:** create_payment locks invoice FOR UPDATE and checks remaining due but does not check a request identity; payments has no idempotency key and no unique index for request identity. These controls prevent overpayment but not identical retries while due remains sufficient.
+- **Fix acceptance criteria:** Require stable idempotency key per logical payment attempt, reuse it on retries, generate a different key for a new intentional payment; atomically guarantee at most one payment and one cashbook entry per key, and handle conflicting payload reuse explicitly. Do not deduplicate by invoice+amount alone.
+- **Retest/regression:** pending implementation. Preserve payment ids 15 and 16 as evidence; do not delete financial records directly.
