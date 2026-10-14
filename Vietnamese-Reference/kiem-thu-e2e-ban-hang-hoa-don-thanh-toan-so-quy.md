@@ -162,3 +162,19 @@
 - **Retest:** RETEST-SALE-011-01 PASS (thu tiền qua API HTTP 200 và đối soát Invoice/Payment/Cashbook); RETEST-SALE-011-02 PASS (thu nợ qua giao diện và đối soát SQL).
 - **Regression:** REG-SALE-12 PASS: EMPLOYEE vẫn không được thanh toán, dữ liệu tài chính không thay đổi.
 - **Trạng thái cuối:** CLOSED / Verified Fixed. Severity: Major; Priority: High.
+
+
+### REG-SALE-13 — Thanh toán trùng khi gửi lại cùng request API (14/10/2026)
+
+- **Kết quả: FAIL.** Quy tắc nghiệp vụ đã xác nhận: cùng một yêu cầu thanh toán gửi lại không được tạo giao dịch thứ hai; hai yêu cầu thanh toán độc lập vẫn được phép khi đáp ứng điều kiện thanh toán.
+- **Baseline HD00000008 (id=8):** paid=72000, due=38000, payment_count=3, cashbook_count=3.
+- **Request 1:** POST /rest/v1/rpc/create_payment, payment_method_id=2, amount=1000, reference_no=REG-SALE-13-DUP-001, notes=REG-SALE-13-FIRST-REQUEST. HTTP 200, payment id=15. SQL: paid=73000, due=37000, payment_count=4, payment_sum=73000, cashbook_count=4, cashbook_in_sum=73000.
+- **Request 2:** Gửi lại nguyên vẹn payload. HTTP 200, tạo payment id=16. SQL: paid=74000, due=36000, payment_count=5, payment_sum=74000, cashbook_count=5, cashbook_in_sum=74000.
+- **Expected:** Request thứ hai được nhận diện là retry, không tạo thêm payment hoặc phiếu thu. **Actual:** Ghi nhận hai payment và hai cashbook, tăng thu thêm 1000.
+
+### DEF-SALE-013 — Tạo thanh toán trùng khi gửi lại request API
+
+- **Trạng thái:** OPEN. **Severity:** Major. **Priority:** High. **Test case:** REG-SALE-13 FAIL.
+- **Bằng chứng nguyên nhân:** create_payment có FOR UPDATE và kiểm tra công nợ nhưng không kiểm tra định danh yêu cầu; bảng payments không có idempotency key hoặc unique index tương ứng. Cơ chế hiện tại chặn vượt công nợ, không chặn retry giống nhau khi vẫn đủ công nợ.
+- **Tiêu chí sửa:** Mỗi lần thanh toán logic có idempotency key ổn định, retry giữ nguyên key, thanh toán độc lập dùng key mới; đảm bảo nguyên tử tối đa một payment và một cashbook trên mỗi key, xử lý rõ trường hợp cùng key nhưng payload khác. Không chặn theo invoice+amount đơn thuần.
+- **Retest/regression:** Chưa thực hiện. Giữ payment id 15 và 16 làm bằng chứng, không xóa trực tiếp dữ liệu tài chính.
