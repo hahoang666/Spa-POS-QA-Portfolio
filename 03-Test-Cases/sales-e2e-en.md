@@ -131,3 +131,11 @@
 - **Actual:** HTTP 403, code 42501, `FORBIDDEN: missing permission PAYMENT_CREATE`.
 - **SQL after rejected call:** Invoice HD00000008 remains PARTIALLY_PAID, paid=70000, due=40000; payment_count=1, payment_sum=70000; cashbook_count=1, cashbook_in_sum=70000 (same as baseline).
 - **Defect:** DEF-SALE-011, OPEN; suspected role-permission configuration mismatch, Severity Major, Priority High (proposed). Security denial behaves correctly per current grants; cashier business flow is blocked. Confirm exact role mapping and payment-vs-debt scope before fixing. No permissions changed.
+
+
+### RETEST-SALE-011-01 — CASHIER payment after permission migration (2026-10-14)
+
+- **Result: PASS (API and SQL).** CASHIER granted INVOICE_CREATE, INVOICE_VIEW, PAYMENT_CREATE; verified 9 total CASHIER permissions, preserving 6 existing grants.
+- **API:** POST /rest/v1/rpc/create_payment with invoice_id=8, payment_method_id=2, amount=1000, note RETEST-SALE-011-01-CASHIER returned HTTP 200. Created payment id=13, shift_id=6.
+- **SQL:** Invoice HD00000008 remains PARTIALLY_PAID; paid_amount=71000 (was 70000), due_amount=39000 (was 40000); payment_count=2, payment_sum=71000; cashbook_count=2, cashbook_in_sum=71000 (previously 1/70000 each).
+- **Defect DEF-SALE-011:** FIXED / pending final verification; cashier collection of old debt and EMPLOYEE permission regression remain NOT RUN. Original REG-SALE-11 FAIL retained as historical evidence.
