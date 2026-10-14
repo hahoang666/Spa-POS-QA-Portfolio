@@ -80,3 +80,13 @@
 - **Thao tác:** Nhập `0` và `-1000` vào số tiền thu, lần lượt nhấn Thu nợ. Cả hai lần UI đều hiển thị “Số tiền thu không hợp lệ.”; công nợ vẫn 40000.
 - **SQL sau kiểm thử so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
 - **Giới hạn:** Chưa chứng minh RPC `create_payment` tự từ chối số tiền không hợp lệ nếu gọi trực tiếp.
+
+
+## REG-SALE-07 — API chặn thanh toán vượt công nợ (14/10/2026)
+
+- **Kết quả:** PASS — Postman RPC và đối soát SQL.
+- **Dữ liệu:** HD00000008, invoice id 8, còn nợ 40000.
+- **Request:** `POST /rest/v1/rpc/create_payment` với `p_invoice_id=8`, `p_payment_method_id=2`, `p_amount=40001`, `p_reference_no=null`, `p_notes=REG-SALE-07-OVERPAYMENT`.
+- **Response:** HTTP `400 Bad Request`, PostgreSQL code `22023`, message `Payment amount exceeds invoice due amount`.
+- **SQL sau API so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
+- **Kết luận:** Backend từ chối overpayment và không ghi nhận giao dịch mới trong kịch bản này. Các trường hợp API bằng 0, số âm hoặc lỗi khác chưa kiểm thử.
