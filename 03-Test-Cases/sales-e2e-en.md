@@ -111,3 +111,13 @@
 - **Post-request SQL matched baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
 - **Regression summary:** REG-SALE-05 through REG-SALE-09: **5/5 PASS** within tested scope.
 - **Limitations:** Concurrency, system failure handling, and all permission/error paths not yet tested.
+
+
+## REG-SALE-10 — create_payment API authorization (2026-10-14)
+
+- **Result:** PASS — permission enforcement and SQL reconciliation.
+- **Permission matrix:** `PAYMENT_CREATE`: ADMIN = GRANTED; CASHIER = NOT_GRANTED; EMPLOYEE = NOT_GRANTED (SQL check of `roles`, `permissions`, `role_permissions`).
+- **Actor:** `employee01` (EMPLOYEE); `POST /rest/v1/rpc/create_payment` with `p_invoice_id=8`, `p_payment_method_id=2`, `p_amount=1000`, `p_notes=REG-SALE-10-UNAUTHORIZED`.
+- **Response:** HTTP `403 Forbidden`, PostgreSQL code `42501`, message `FORBIDDEN: missing permission PAYMENT_CREATE`.
+- **Post-request SQL matched baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
+- **Verdict:** EMPLOYEE cannot create unauthorized payments; no financial data changes. **Review CASHIER requirements** because CASHIER also lacks `PAYMENT_CREATE`; not classified as a defect until checked against requirements.
