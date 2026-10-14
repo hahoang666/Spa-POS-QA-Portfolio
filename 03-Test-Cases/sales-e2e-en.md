@@ -121,3 +121,13 @@
 - **Response:** HTTP `403 Forbidden`, PostgreSQL code `42501`, message `FORBIDDEN: missing permission PAYMENT_CREATE`.
 - **Post-request SQL matched baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
 - **Verdict:** EMPLOYEE cannot create unauthorized payments; no financial data changes. **Review CASHIER requirements** because CASHIER also lacks `PAYMENT_CREATE`; not classified as a defect until checked against requirements.
+
+
+## REG-SALE-11 — CASHIER payment authorization (2026-10-14)
+
+- **Result:** FAIL against cashier payment business requirement; rejected transaction data integrity PASS.
+- **Preconditions:** CASHIER has only ATTENDANCE_SELF, RETURN_CREATE, RETURN_VIEW, shift.open, shift.close, shift.view. INVOICE_CREATE, INVOICE_VIEW, PAYMENT_CREATE exist but are not granted to CASHIER.
+- **Test:** Authenticated CASHIER calls `POST /rest/v1/rpc/create_payment` for invoice 8, payment method 2, amount 1000, note REG-SALE-11-CASHIER-AUTH.
+- **Actual:** HTTP 403, code 42501, `FORBIDDEN: missing permission PAYMENT_CREATE`.
+- **SQL after rejected call:** Invoice HD00000008 remains PARTIALLY_PAID, paid=70000, due=40000; payment_count=1, payment_sum=70000; cashbook_count=1, cashbook_in_sum=70000 (same as baseline).
+- **Defect:** DEF-SALE-011, OPEN; suspected role-permission configuration mismatch, Severity Major, Priority High (proposed). Security denial behaves correctly per current grants; cashier business flow is blocked. Confirm exact role mapping and payment-vs-debt scope before fixing. No permissions changed.
