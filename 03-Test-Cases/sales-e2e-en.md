@@ -80,3 +80,13 @@
 - **Actions:** Entered `0` and `-1000` as collection amounts and clicked Collect Debt separately. Both attempts displayed “Số tiền thu không hợp lệ.”; outstanding debt remained 40000.
 - **Post-test SQL matched baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
 - **Limitation:** Direct RPC `create_payment` validation for invalid amounts remains untested.
+
+
+## REG-SALE-07 — Backend rejects debt overpayment (2026-10-14)
+
+- **Result:** PASS — Postman RPC rejection and SQL reconciliation.
+- **Fixture:** HD00000008, invoice id 8, due 40000.
+- **Request:** `POST /rest/v1/rpc/create_payment` with `p_invoice_id=8`, `p_payment_method_id=2`, `p_amount=40001`, `p_reference_no=null`, `p_notes=REG-SALE-07-OVERPAYMENT`.
+- **Response:** HTTP `400 Bad Request`, PostgreSQL code `22023`, message `Payment amount exceeds invoice due amount`.
+- **Post-request SQL matched baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
+- **Verdict:** Backend rejected overpayment without new financial records in this scenario. Zero/negative API inputs and other error paths remain untested.
