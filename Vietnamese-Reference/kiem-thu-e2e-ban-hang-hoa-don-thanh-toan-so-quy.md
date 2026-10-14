@@ -147,3 +147,18 @@
 - **SQL trước → sau:** PARTIALLY_PAID → PARTIALLY_PAID; paid_amount 71000 → 72000; due_amount 39000 → 38000; payment_count 2 → 3; payment_sum 71000 → 72000; cashbook_count 2 → 3; cashbook_in_sum 71000 → 72000.
 - **Đối soát:** 72000 + 38000 = tổng hóa đơn 110000; payment sum = cashbook IN sum.
 - **DEF-SALE-011:** FIXED / chờ REG-SALE-12 kiểm thử hồi quy quyền EMPLOYEE trước khi CLOSED. Giữ REG-SALE-11 FAIL ban đầu.
+
+
+### REG-SALE-12 — Hồi quy phân quyền EMPLOYEE (14/10/2026)
+
+- **Trạng thái: PASS.** SQL phân quyền: PAYMENT_CREATE được cấp cho ADMIN và CASHIER, không cấp cho EMPLOYEE.
+- **Postman:** Đăng nhập employee01 (EMPLOYEE), gọi POST /rest/v1/rpc/create_payment cho hóa đơn 8, phương thức 2, số tiền 1000, ghi chú REG-SALE-12-EMPLOYEE-DENIED. Kết quả HTTP 403 Forbidden, mã 42501, thông báo "FORBIDDEN: missing permission PAYMENT_CREATE".
+- **Đối soát SQL:** HD00000008 giữ nguyên PARTIALLY_PAID; paid_amount=72000, due_amount=38000, payment_count=3, payment_sum=72000, cashbook_count=3, cashbook_in_sum=72000. Không phát sinh giao dịch trái quyền.
+
+### DEF-SALE-011 — CLOSED (Verified Fixed, 14/10/2026)
+
+- **Lỗi ban đầu:** CASHIER không thể thu tiền do thiếu PAYMENT_CREATE, API trả HTTP 403; REG-SALE-11 FAIL.
+- **Khắc phục:** Cấp INVOICE_CREATE, INVOICE_VIEW, PAYMENT_CREATE cho CASHIER; SQL xác nhận tổng 9 quyền, giữ nguyên quyền cũ.
+- **Retest:** RETEST-SALE-011-01 PASS (thu tiền qua API HTTP 200 và đối soát Invoice/Payment/Cashbook); RETEST-SALE-011-02 PASS (thu nợ qua giao diện và đối soát SQL).
+- **Regression:** REG-SALE-12 PASS: EMPLOYEE vẫn không được thanh toán, dữ liệu tài chính không thay đổi.
+- **Trạng thái cuối:** CLOSED / Verified Fixed. Severity: Major; Priority: High.
