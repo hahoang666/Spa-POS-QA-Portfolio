@@ -121,3 +121,13 @@
 - **Response:** HTTP `403 Forbidden`, PostgreSQL code `42501`, message `FORBIDDEN: missing permission PAYMENT_CREATE`.
 - **SQL sau request so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không đổi.
 - **Kết luận:** EMPLOYEE không thể tạo thanh toán trái quyền và không ghi dữ liệu. **Cần rà soát yêu cầu nghiệp vụ CASHIER** vì vai trò này cũng đang thiếu `PAYMENT_CREATE`; chưa kết luận đó là defect nếu chưa đối chiếu baseline.
+
+
+## REG-SALE-11 — Phân quyền thanh toán CASHIER (14/10/2026)
+
+- **Kết quả:** FAIL so với nghiệp vụ thu tiền của CASHIER; toàn vẹn dữ liệu giao dịch bị từ chối PASS.
+- **Điều kiện:** CASHIER chỉ có ATTENDANCE_SELF, RETURN_CREATE, RETURN_VIEW, shift.open, shift.close, shift.view. INVOICE_CREATE, INVOICE_VIEW, PAYMENT_CREATE tồn tại nhưng chưa gán cho CASHIER.
+- **Thực thi:** CASHIER gọi `POST /rest/v1/rpc/create_payment` cho hóa đơn id=8, phương thức 2, số tiền 1000, ghi chú REG-SALE-11-CASHIER-AUTH.
+- **Actual:** HTTP 403, code 42501, `FORBIDDEN: missing permission PAYMENT_CREATE`.
+- **SQL sau request:** HD00000008 vẫn PARTIALLY_PAID, đã thu 70000, còn nợ 40000; payment_count=1, payment_sum=70000; cashbook_count=1, cashbook_in_sum=70000 (không đổi so với baseline).
+- **Defect:** DEF-SALE-011, OPEN; nghi vấn cấu hình gán quyền sai nghiệp vụ, Severity Major, Priority High (đề xuất). API từ chối đúng theo quyền hiện hành nhưng luồng thu tiền CASHIER bị chặn. Cần xác nhận ánh xạ role và phạm vi thanh toán/thu nợ trước khi sửa. Chưa thay đổi quyền.
