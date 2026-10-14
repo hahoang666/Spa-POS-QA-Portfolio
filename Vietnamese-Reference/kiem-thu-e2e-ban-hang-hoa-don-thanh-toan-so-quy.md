@@ -178,3 +178,45 @@
 - **Bằng chứng nguyên nhân:** create_payment có FOR UPDATE và kiểm tra công nợ nhưng không kiểm tra định danh yêu cầu; bảng payments không có idempotency key hoặc unique index tương ứng. Cơ chế hiện tại chặn vượt công nợ, không chặn retry giống nhau khi vẫn đủ công nợ.
 - **Tiêu chí sửa:** Mỗi lần thanh toán logic có idempotency key ổn định, retry giữ nguyên key, thanh toán độc lập dùng key mới; đảm bảo nguyên tử tối đa một payment và một cashbook trên mỗi key, xử lý rõ trường hợp cùng key nhưng payload khác. Không chặn theo invoice+amount đơn thuần.
 - **Retest/regression:** Chưa thực hiện. Giữ payment id 15 và 16 làm bằng chứng, không xóa trực tiếp dữ liệu tài chính.
+
+
+## Bổ sung kết quả sửa lỗi DEF-SALE-013 và kiểm thử lại (14/10/2026)
+
+**Giữ nguyên REG-SALE-13 FAIL và bằng chứng lỗi ban đầu phía trên.** Các ghi chú “chưa triển khai” ở phần lịch sử đã được thay thế bởi kết quả bên dưới. Severity: Major; Priority: High. **Trạng thái hiện tại: FIXED / chờ xác nhận đóng lỗi (OPEN)**; bước Postman kiểm tra RPC cũ được người kiểm thử chủ động bỏ qua, không được ghi PASS.
+
+### Migration, RPC và frontend
+
+- **MIG-PAY-013-01 PASS:** Bổ sung `payments.idempotency_key uuid`, `payments.request_fingerprint text`, unique partial index `ux_payments_idempotency_key`.
+- **RPC `create_payment_v2`:** Yêu cầu UUID idempotency; kiểm tra đăng nhập và PAYMENT_CREATE; cùng key và cùng payload trả lại Payment đã có; cùng key nhưng payload khác trả HTTP 409 / 23505 `IDEMPOTENCY_KEY_CONFLICT`; kiểm tra công nợ, phương thức, ca và quỹ trước khi tạo Payment/Cashbook.
+- **Frontend:** Cả Bán hàng và Thu nợ chuyển sang `create_payment_v2`; lưu UUID/pending state phía client. Commit `054cfba02e11ed976b3051c38a5d361479b9d35e` (tích hợp RPC v2), `d09f6428a4b7d561c38bbb0ead338ab9ff754b69` (bắt lỗi promise làm mới ca ở login). Smoke UI/login/Console PASS. Chưa chứng minh khả năng phục hồi mất phản hồi mạng và chống tạo trùng hóa đơn ban đầu.
+
+### Test case backend — bằng chứng API và SQL
+
+| Test Case | Kết quả thực tế | Status |
+| --- | --- | --- |
+| RETEST-SALE-013-01 | Thanh toán v2 lần đầu 1000 cho hóa đơn 8, UUID `f4d2a0c1-6e8b-4a79-9c25-7b1e3d6f9012`, Payment id 17. SQL paid=75000, due=35000, payment_count=6, cashbook_count=6 | PASS |
+| RETEST-SALE-013-02 | Retry cùng key/payload trả lại id 17; SQL không đổi | PASS |
+| RETEST-SALE-013-03 | Cùng key, đổi amount=2000 → HTTP 409, code 23505 `IDEMPOTENCY_KEY_CONFLICT`; SQL không đổi | PASS |
+| REG-SALE-013-04 | Hai giao dịch độc lập, key khác nhau, 1000 mỗi giao dịch → Payment id 18,19; SQL paid=77000, due=33000, payment_count=8, cashbook_count=8 | PASS |
+| REG-SALE-013-05 | EMPLOYEE gọi v2 → HTTP 403, code 42501, `FORBIDDEN: missing permission PAYMENT_CREATE`; SQL paid=77000, due=33000, payment_count=8, cashbook_count=8; unauthorized key count=0 | PASS |
+
+### Test case frontend — bằng chứng UI và SQL
+
+| Test Case | Thao tác / Actual | SQL Evidence | Status |
+| --- | --- | --- | --- |
+| REG-SALE-013-06-A | ADMIN thanh toán bán hàng HD00000013; không lỗi Console | Invoice id 13: total=50000, paid=50000, due=0, PAID; payment_count=1, cashbook_count=1, idempotent_payment_count=1 | PASS |
+| REG-SALE-013-06-B | Nhấn thanh toán nhanh hai lần; báo `Đang xử lý hóa đơn, vui lòng chờ.`; chỉ ghi nhận một lần. **HD00000014 là bài kiểm thử dịch vụ 0đ riêng biệt, không phải bằng chứng lỗi của ca double-click.** Fixture đúng: HD00000015 | Invoice id 15: total=50000, paid=50000, due=0, PAID; payment_count=1, cashbook_count=1, idempotent_payment_count=1 | PASS |
+| REG-SALE-013-06-C | Thu nợ 1000 CASH HD00000008 một lần, UI báo thành công, không lỗi Console; đã trả 77000→78000, còn nợ 33000→32000 | total=110000, paid=78000, due=32000, PARTIALLY_PAID, payment_count=9, idempotent_payment_count=4, latest_payment_id=22, latest_payment_amount=1000, cashbook_count=9 | PASS |
+| REG-SALE-013-06-D | Nhấn Thu nợ 1000 CASH nhanh hai lần, chỉ một thông báo `Đã thu nợ 1.000 ₫ và đồng bộ Supabase.`, không lỗi Console; đã trả 78000→79000, nợ 32000→31000 | paid=79000, due=31000, PARTIALLY_PAID, payment_count=10, idempotent_payment_count=5, latest_payment_id=23, latest_payment_amount=1000, cashbook_count=10 | PASS |
+
+**Lưu ý đối soát:** Các mốc SQL của hóa đơn 8 là dữ liệu cộng dồn theo thời gian. REG-SALE-013-06-D tăng đúng 1 Payment và 1 Cashbook so với mốc trước, không phải tạo 10 giao dịch mới.
+
+### REG-SALE-013-07 — Thu hồi quyền RPC cũ
+
+- **Trước sửa, SQL:** `create_payment` SECURITY DEFINER, quyền EXECUTE: anon=true, authenticated=true, service_role=true; `create_payment_v2`: anon=false, authenticated=true, service_role=true. RPC cũ còn đường gọi trực tiếp, không yêu cầu idempotency key.
+- **MIG-PAY-013-03 thực thi thành công:** `REVOKE ALL ON FUNCTION public.create_payment(bigint,bigint,numeric,text,text) FROM PUBLIC, anon, authenticated;`
+- **REG-SALE-013-07-A PASS (SQL):** `create_payment`: anon=false, authenticated=false, service_role=true; `create_payment_v2`: anon=false, authenticated=true, service_role=true.
+- **REG-SALE-013-07-B NOT RUN / SKIPPED BY USER:** Không thực hiện Postman gọi `create_payment` bằng JWT ADMIN; **không có HTTP 403 thực tế** để ghi nhận. Kết quả SQL xác minh phân quyền là PASS nhưng kiểm thử API trực tiếp chưa thực hiện.
+- **Phạm vi còn lại:** Cân nhắc chấp nhận bằng chứng SQL để đóng lỗi hoặc chạy bổ sung negative API test; chưa kiểm thử mất phản hồi/timeout và retry từ frontend; rà soát tích hợp khác dùng RPC cũ. Giữ nguyên Payment id 15,16 làm bằng chứng lỗi lịch sử; không xóa dữ liệu tài chính trực tiếp.
+
+**Trạng thái DEF-SALE-013: OPEN / FIXED PENDING FINAL ACCEPTANCE.** Đã có bằng chứng PASS cho backend idempotency, UI Bán hàng/Thu nợ và quyền RPC cũ bằng SQL, nhưng chưa xác nhận đóng lỗi.
