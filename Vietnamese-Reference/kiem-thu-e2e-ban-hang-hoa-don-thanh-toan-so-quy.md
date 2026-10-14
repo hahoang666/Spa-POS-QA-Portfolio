@@ -90,3 +90,13 @@
 - **Response:** HTTP `400 Bad Request`, PostgreSQL code `22023`, message `Payment amount exceeds invoice due amount`.
 - **SQL sau API so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
 - **Kết luận:** Backend từ chối overpayment và không ghi nhận giao dịch mới trong kịch bản này. Các trường hợp API bằng 0, số âm hoặc lỗi khác chưa kiểm thử.
+
+
+## REG-SALE-08 — API từ chối thanh toán bằng 0 (14/10/2026)
+
+- **Kết quả:** PASS — Postman RPC và đối soát SQL.
+- **Dữ liệu:** HD00000008, invoice id 8, công nợ 40000.
+- **Request:** `POST /rest/v1/rpc/create_payment` với `p_invoice_id=8`, `p_payment_method_id=2`, `p_amount=0`, `p_notes=REG-SALE-08-ZERO-AMOUNT`.
+- **Response:** HTTP `400 Bad Request`, code `22023`, message `Payment amount must be greater than 0`.
+- **SQL sau API so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
+- **Kết luận:** Backend từ chối giá trị 0 và không tạo giao dịch mới. Kiểm thử API với số âm chưa thực hiện.
