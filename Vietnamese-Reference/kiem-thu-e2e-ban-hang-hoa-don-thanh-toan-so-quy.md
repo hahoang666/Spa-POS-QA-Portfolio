@@ -61,3 +61,13 @@
 - **Bản sửa:** PR #2 đã merge vào `main`, squash commit `a3865a175ab25b1f9462ddf66877192d35f397f2`; frontend gọi Supabase `create_payment` và đồng bộ lại dữ liệu.
 - **RETEST PASS:** Invoice 12 `COMPLETED/PAID`, tổng 110000, đã thu 110000, nợ 0; payment 11 CASH 70000 + payment 12 BANK_TRANSFER 40000; cashbook 12 CASH IN 70000 + cashbook 13 BANK_TRANSFER IN 40000, cùng tham chiếu invoice 12. UI giữ trạng thái sau reload; ẩn nút Thu nợ; quỹ ngân hàng tăng 40000.
 - **Trạng thái defect:** DEF-SALE-004 VERIFIED / CLOSED trong phạm vi kịch bản đã báo. Regression và nhánh lỗi khác chưa kiểm thử.
+
+
+## REG-SALE-05 — Chặn thu nợ vượt công nợ (14/10/2026)
+
+- **Kết quả:** PASS (UI regression và đối soát dữ liệu); chưa kiểm tra API trực tiếp.
+- **Dữ liệu:** HD00000008 (invoice id 8), PARTIALLY_PAID, đã thu 70000, còn nợ 40000.
+- **Thao tác:** Nhập 40001, chọn chuyển khoản và xác nhận một lần. UI cảnh báo “Số tiền thu không hợp lệ.”; công nợ vẫn 40000.
+- **SQL trước và sau:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
+- **Quan sát Console:** `index.ts.js:5 {error: "SOURCE_LANG_VI"}`; chưa xác định liên quan ứng dụng hay tiện ích trình duyệt, không tính là defect của luồng này.
+- **Giới hạn:** Chưa xác minh backend tự chặn overpayment khi gọi RPC/API trực tiếp.
