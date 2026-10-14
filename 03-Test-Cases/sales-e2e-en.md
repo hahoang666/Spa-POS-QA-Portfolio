@@ -147,3 +147,18 @@
 - **SQL baseline → actual:** PARTIALLY_PAID → PARTIALLY_PAID; paid_amount 71000 → 72000; due_amount 39000 → 38000; payment_count 2 → 3; payment_sum 71000 → 72000; cashbook_count 2 → 3; cashbook_in_sum 71000 → 72000.
 - **Reconciliation:** 72000 + 38000 = invoice total 110000; payment sum equals cashbook IN sum.
 - **DEF-SALE-011:** FIXED / pending REG-SALE-12 EMPLOYEE authorization regression before CLOSED. Original REG-SALE-11 FAIL retained.
+
+
+### REG-SALE-12 — EMPLOYEE authorization regression (2026-10-14)
+
+- **Status: PASS.** Permission SQL: PAYMENT_CREATE is GRANTED to ADMIN and CASHIER, NOT_GRANTED to EMPLOYEE.
+- **Postman:** Authenticated as employee01 (EMPLOYEE), called POST /rest/v1/rpc/create_payment for invoice 8, payment method 2, amount 1000, note REG-SALE-12-EMPLOYEE-DENIED. HTTP 403 Forbidden, error code 42501, message "FORBIDDEN: missing permission PAYMENT_CREATE".
+- **Post-request SQL:** HD00000008 remained PARTIALLY_PAID; paid_amount=72000, due_amount=38000, payment_count=3, payment_sum=72000, cashbook_count=3, cashbook_in_sum=72000. All unchanged from baseline; no unauthorized transaction.
+
+### DEF-SALE-011 — CLOSED (Verified Fixed, 2026-10-14)
+
+- **Original defect:** CASHIER could not create payment; API returned 403 due to missing PAYMENT_CREATE. REG-SALE-11 initially FAIL.
+- **Fix:** Granted INVOICE_CREATE, INVOICE_VIEW, PAYMENT_CREATE to CASHIER. SQL confirmed 9 CASHIER permissions, preserving existing permissions.
+- **Retest:** RETEST-SALE-011-01 PASS (cashier API payment, HTTP 200 and invoice/payment/cashbook reconciled); RETEST-SALE-011-02 PASS (cashier UI debt collection, SQL reconciled).
+- **Regression:** REG-SALE-12 PASS: EMPLOYEE remains unauthorized and financial data unchanged.
+- **Final status:** CLOSED / Verified Fixed. Severity: Major; Priority: High.
