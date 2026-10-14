@@ -61,3 +61,13 @@
 - **Fix deployed:** PR #2 merged into `main`, squash commit `a3865a175ab25b1f9462ddf66877192d35f397f2`; frontend calls Supabase `create_payment` and refreshes backend sales data.
 - **Retest PASS:** Invoice 12 `COMPLETED/PAID`, total 110000, paid 110000, due 0; payment 11 CASH 70000 + payment 12 BANK_TRANSFER 40000; cashbook 12 CASH IN 70000 + cashbook 13 BANK_TRANSFER IN 40000, both referencing invoice 12. UI persisted after reload; debt action hidden; bank cashbook +40000.
 - **Defect disposition:** DEF-SALE-004 VERIFIED / CLOSED for reported scenario. Other regression and error-path cases remain untested.
+
+
+## REG-SALE-05 — Reject collection exceeding remaining debt (2026-10-14)
+
+- **Result:** PASS (UI regression and data integrity); direct API enforcement not yet tested.
+- **Fixture:** HD00000008 (invoice id 8), PARTIALLY_PAID, paid 70000, due 40000.
+- **Action:** Entered 40001, chose BANK_TRANSFER, confirmed once. UI displayed “Số tiền thu không hợp lệ.”; remaining debt stayed 40000.
+- **SQL baseline and post-test:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — unchanged.
+- **Console observation:** `index.ts.js:5 {error: "SOURCE_LANG_VI"}`; source not yet established, not attributed to the app.
+- **Scope limitation:** Backend-side overpayment rejection via direct RPC/API remains unverified.
