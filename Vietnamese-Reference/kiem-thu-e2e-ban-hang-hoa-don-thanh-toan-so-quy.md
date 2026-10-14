@@ -139,3 +139,11 @@
 - **API:** POST /rest/v1/rpc/create_payment với invoice_id=8, payment_method_id=2, amount=1000, ghi chú RETEST-SALE-011-01-CASHIER trả HTTP 200. Tạo payment id=13, shift_id=6.
 - **SQL:** HD00000008 vẫn PARTIALLY_PAID; paid_amount=71000 (trước 70000), due_amount=39000 (trước 40000); payment_count=2, payment_sum=71000; cashbook_count=2, cashbook_in_sum=71000 (trước đó đều 1/70000).
 - **DEF-SALE-011:** FIXED / chờ xác minh cuối; chưa chạy thu nợ hóa đơn cũ bằng CASHIER và regression quyền EMPLOYEE. Giữ kết quả REG-SALE-11 FAIL ban đầu làm bằng chứng lịch sử.
+
+
+### RETEST-SALE-011-02 — CASHIER thu nợ hóa đơn cũ qua UI (14/10/2026)
+
+- **Kết quả: PASS (UI và SQL).** Đăng nhập CASHIER, thấy hóa đơn HD00000008 và nút Thu nợ. Thu thêm 1.000 ₫ qua giao diện Spa POS; UI báo đồng bộ Supabase và không có lỗi Console.
+- **SQL trước → sau:** PARTIALLY_PAID → PARTIALLY_PAID; paid_amount 71000 → 72000; due_amount 39000 → 38000; payment_count 2 → 3; payment_sum 71000 → 72000; cashbook_count 2 → 3; cashbook_in_sum 71000 → 72000.
+- **Đối soát:** 72000 + 38000 = tổng hóa đơn 110000; payment sum = cashbook IN sum.
+- **DEF-SALE-011:** FIXED / chờ REG-SALE-12 kiểm thử hồi quy quyền EMPLOYEE trước khi CLOSED. Giữ REG-SALE-11 FAIL ban đầu.
