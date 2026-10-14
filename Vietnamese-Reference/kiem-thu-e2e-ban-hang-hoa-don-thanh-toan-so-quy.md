@@ -100,3 +100,14 @@
 - **Response:** HTTP `400 Bad Request`, code `22023`, message `Payment amount must be greater than 0`.
 - **SQL sau API so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
 - **Kết luận:** Backend từ chối giá trị 0 và không tạo giao dịch mới. Kiểm thử API với số âm chưa thực hiện.
+
+
+## REG-SALE-09 — API từ chối thanh toán số âm (14/10/2026)
+
+- **Kết quả:** PASS — Postman RPC và đối soát SQL.
+- **Dữ liệu:** HD00000008, invoice id 8, công nợ 40000.
+- **Request:** `POST /rest/v1/rpc/create_payment`, `p_invoice_id=8`, `p_payment_method_id=2`, `p_amount=-1000`, `p_notes=REG-SALE-09-NEGATIVE-AMOUNT`.
+- **Response:** HTTP `400 Bad Request`, code `22023`, message `Payment amount must be greater than 0`.
+- **SQL sau API so với baseline:** `payment_status=PARTIALLY_PAID`, `paid_amount=70000`, `due_amount=40000`, `payment_count=1`, `payment_sum=70000`, `cashbook_count=1`, `cashbook_in_sum=70000` — không thay đổi.
+- **Tổng hợp Regression:** REG-SALE-05, REG-SALE-06, REG-SALE-07, REG-SALE-08, REG-SALE-09: **5/5 PASS** trong phạm vi đã kiểm thử.
+- **Giới hạn:** Chưa kiểm thử race condition, API lỗi hệ thống, đồng thời nhiều request hoặc tất cả nhánh quyền.
