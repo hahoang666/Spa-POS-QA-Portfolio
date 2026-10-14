@@ -131,3 +131,11 @@
 - **Actual:** HTTP 403, code 42501, `FORBIDDEN: missing permission PAYMENT_CREATE`.
 - **SQL sau request:** HD00000008 vẫn PARTIALLY_PAID, đã thu 70000, còn nợ 40000; payment_count=1, payment_sum=70000; cashbook_count=1, cashbook_in_sum=70000 (không đổi so với baseline).
 - **Defect:** DEF-SALE-011, OPEN; nghi vấn cấu hình gán quyền sai nghiệp vụ, Severity Major, Priority High (đề xuất). API từ chối đúng theo quyền hiện hành nhưng luồng thu tiền CASHIER bị chặn. Cần xác nhận ánh xạ role và phạm vi thanh toán/thu nợ trước khi sửa. Chưa thay đổi quyền.
+
+
+### RETEST-SALE-011-01 — CASHIER thanh toán sau migration (14/10/2026)
+
+- **Kết quả: PASS (API và SQL).** CASHIER được gán INVOICE_CREATE, INVOICE_VIEW, PAYMENT_CREATE; SQL xác nhận tổng 9 quyền, giữ nguyên 6 quyền cũ.
+- **API:** POST /rest/v1/rpc/create_payment với invoice_id=8, payment_method_id=2, amount=1000, ghi chú RETEST-SALE-011-01-CASHIER trả HTTP 200. Tạo payment id=13, shift_id=6.
+- **SQL:** HD00000008 vẫn PARTIALLY_PAID; paid_amount=71000 (trước 70000), due_amount=39000 (trước 40000); payment_count=2, payment_sum=71000; cashbook_count=2, cashbook_in_sum=71000 (trước đó đều 1/70000).
+- **DEF-SALE-011:** FIXED / chờ xác minh cuối; chưa chạy thu nợ hóa đơn cũ bằng CASHIER và regression quyền EMPLOYEE. Giữ kết quả REG-SALE-11 FAIL ban đầu làm bằng chứng lịch sử.
