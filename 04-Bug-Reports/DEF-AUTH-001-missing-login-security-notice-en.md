@@ -1,36 +1,55 @@
 # DEF-AUTH-001 — Required security notice missing on login screen
 
+## Defect details
+
 | Field | Value |
-|---|---|
-| Project | Spa POS |
+| --- | --- |
+| Defect ID | DEF-AUTH-001 |
+| Project | Spa POS (web demo) |
 | Module | Authentication / Login |
-| Requirement | AUTH-05 — Session handling |
-| Related test case | AUTH-UI-05 |
-| Type | UI / Requirement compliance |
-| Severity | Minor (proposed) |
-| Priority | Medium (proposed) |
+| Related requirement | AUTH-05 |
+| Related test case | [AUTH-UI-05](../03-Test-Cases/authentication-ui-validation-en.md) |
+| Defect type | UI / Requirement compliance |
+| Severity | Minor (proposed; pending triage) |
+| Priority | Medium (proposed; pending triage) |
 | Status | OPEN |
-| Detection date | 2026-10-13 |
-| Environment | Spa POS web; browser/build not recorded |
-| Evidence | Tester-reported manual observation; no new screenshot attached |
-| Retest | NOT RUN |
+| Detected on | 2026-10-13 |
+| Last reproduction | 2026-10-13 |
+| Environment | Spa POS web; browser version and build SHA not recorded |
+| Assigned to | Unassigned / not recorded |
+| Retest status | NOT RUN — no confirmed fix |
+| Evidence | Chờ bổ sung |
+
+## Preconditions
+
+User is logged out and the login page is displayed.
 
 ## Steps to reproduce
-1. Open Spa POS in a logged-out state.
-2. Inspect the entire login screen.
-3. Look for the security notice specified by AUTH-05.
+
+1. Open the Spa POS login page.
+2. Inspect the entire login form for the notice specified in AUTH-05.
 
 ## Expected result
-The login screen displays the exact baseline notice: **“Không lưu thông tin đăng nhập trên thiết bị”**.
+
+The login page displays the required notice: **“Không lưu thông tin đăng nhập trên thiết bị”**.
 
 ## Actual result
-The required notice is absent. Login form and authentication otherwise remain functional according to the tester.
 
-## Impact
-The UI does not meet an explicitly documented security-information requirement. This observation **does not establish** that credentials are stored insecurely.
+The required security notice is not displayed. Other login controls remain visible.
 
-## Suggested fix
-Add the notice to the login screen and verify its visibility at desktop, tablet and mobile sizes. Confirm the intended meaning of the notice alongside the Remember Username checkbox and session restoration logic to avoid misleading users.
+## Impact / Risk
 
-## Retest criteria
-The notice is visible and readable on the login screen at 375×667, 768×1024 and 1366×768; login and Remember Username behavior are unchanged. Record a screenshot and current build/commit.
+Documented login-screen information requirement is unmet. This observation does **not** prove insecure credential storage.
+
+## Suggested investigation / fix
+
+Confirm the baseline wording is compatible with Remember Username and session restoration; implement the approved notice.
+
+## Retest / Exit criteria
+
+After a fix, verify the notice is visible on supported desktop viewport(s), without breaking login or Remember Username. Mobile device testing is outside the currently agreed scope.
+
+## Evidence and limitations
+
+Tester-reported screen observation; no case-specific defect screenshot has been verified in the evidence folder.
+
