@@ -1,27 +1,28 @@
-# DEF-SALE-013 — Idempotency Retest and Regression (2026-10-14)
+# DEF-SALE-013 — Idempotency Retest and Regression Test Cases
 
-**Original defect:** REG-SALE-13 FAIL; identical legacy create_payment retry generated duplicate payments 15 and 16 and corresponding cashbook receipts. Severity Major, Priority High. Preserve original FAIL. **Current defect status: OPEN / FIXED PENDING FINAL ACCEPTANCE.**
+**Historical execution:** 2026-10-14. **Defect:** OPEN / FIXED PENDING FINAL ACCEPTANCE. **Evidence:** Chờ bổ sung means no committed case-specific evidence verified; historical SQL observations remain in Actual Result.
 
-## Implementation and evidence
-- MIG-PAY-013-01 PASS: payments.idempotency_key UUID, request_fingerprint text, partial unique index ux_payments_idempotency_key.
-- create_payment_v2: same key/payload returns original payment; same key/changed payload returns HTTP 409, SQLSTATE 23505; permission PAYMENT_CREATE required.
-- Frontend cashier checkout and debt collection migrated to create_payment_v2; commits 054cfba02e11ed976b3051c38a5d361479b9d35e and d09f6428a4b7d561c38bbb0ead338ab9ff754b69.
-- MIG-PAY-013-03 PASS: REVOKE ALL ON FUNCTION public.create_payment(bigint,bigint,numeric,text,text) FROM PUBLIC, anon, authenticated.
+## Test case register
 
-| Test | Observed evidence | Result |
-| --- | --- | --- |
-| RETEST-SALE-013-01 | First v2 payment id 17, amount 1000, invoice 8; SQL paid 75000, due 35000, payments 6, cashbook 6 | PASS |
-| RETEST-SALE-013-02 | Retry same UUID and payload returned payment id 17; SQL unchanged | PASS |
-| RETEST-SALE-013-03 | Same UUID, changed amount 2000: HTTP 409 / 23505 IDEMPOTENCY_KEY_CONFLICT; SQL unchanged | PASS |
-| REG-SALE-013-04 | Two independent UUIDs: payment ids 18,19, amount 1000 each; SQL paid 77000, due 33000, payments 8, cashbook 8 | PASS |
-| REG-SALE-013-05 | EMPLOYEE unauthorized: HTTP 403 / 42501; SQL paid 77000, due 33000, payments 8, cashbook 8, unauthorized key count 0 | PASS |
-| REG-SALE-013-06-A | ADMIN checkout HD00000013; SQL total/paid 50000, due 0, PAID, payments 1, cashbook 1, idempotent payments 1; no Console error | PASS |
-| REG-SALE-013-06-B | Double-click checkout: one completion, in-progress alert; fixture HD00000015 total/paid 50000, due 0, PAID, payments 1, cashbook 1, idempotent payments 1 | PASS |
-| REG-SALE-013-06-C | HD00000008 debt CASH 1000: UI success; SQL paid 78000, due 32000, PARTIALLY_PAID, payments 9, idempotent payments 4, latest payment id 22 amount 1000, cashbook 9 | PASS |
-| REG-SALE-013-06-D | Rapid double-click debt CASH 1000: one success message, no console error; SQL paid 79000, due 31000, PARTIALLY_PAID, payments 10, idempotent payments 5, latest payment id 23 amount 1000, cashbook 10 | PASS |
-| REG-SALE-013-07-A | SQL privilege check after REVOKE: legacy create_payment anon=false authenticated=false service_role=true; v2 anon=false authenticated=true service_role=true | PASS |
-| REG-SALE-013-07-B | Direct Postman call to legacy RPC using ADMIN JWT intentionally skipped by tester; no HTTP status observed | NOT RUN / SKIPPED |
+| Test Case ID | Requirement ID | Test Type | Scenario | Steps / Test Data | Expected Result | Priority | Actual Result | Status | Defect ID | Evidence | Build / Date |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| RETEST-SALE-013-01 | SALE-04, SALE-05 | API / SQL / Retest | First payment via create_payment_v2 | Call v2 with fresh UUID, invoice 8, CASH amount 1000; query invoice, payments and cashbook | One payment and one matching cashbook entry; due decreases by 1000 | High | Payment id 17 created for 1000; cumulative invoice paid 75000, due 35000; payments 6, cashbook 6 | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| RETEST-SALE-013-02 | SALE-04, SALE-05 | API / SQL / Retest | Same idempotency key and same payload | Retry v2 with identical UUID and request data from previous call; query counts | Return original payment; no duplicate payment/cashbook | Critical | Returned payment id 17 again; SQL totals/counts unchanged | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| RETEST-SALE-013-03 | SALE-04, SALE-05 | API / Negative / Retest | Same key with changed payload | Reuse UUID from prior call but change amount to 2000 | Reject conflicting payload; no financial changes | Critical | HTTP 409 / SQLSTATE 23505 / IDEMPOTENCY_KEY_CONFLICT; SQL unchanged | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| REG-SALE-013-04 | SALE-04, SALE-05 | API / Regression | Distinct keys create distinct payments | Submit two valid 1000 payments using separate UUIDs; reconcile SQL | Two authorized payments and matching cashbook entries | High | Payment ids 18 and 19; cumulative paid 77000, due 33000; payments 8, cashbook 8 | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| REG-SALE-013-05 | PAYMENT_CREATE | API / Security / Regression | Employee cannot create payment | Use authenticated EMPLOYEE account to call create_payment_v2; compare SQL | HTTP 403; no payment/cashbook created | Critical | HTTP 403 / 42501; paid 77000, due 33000; payments 8, cashbook 8; unauthorized key count 0 | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| REG-SALE-013-06-A | SALE-02, SALE-04, SALE-05 | UI / SQL / Regression | Normal ADMIN checkout | ADMIN completes checkout for HD00000013; reconcile invoice and linked records | PAID invoice; one payment and cashbook record | High | HD00000013 total/paid 50000, due 0, PAID; payments 1, cashbook 1; no console error | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| REG-SALE-013-06-B | SALE-02, SALE-04, SALE-05 | UI / SQL / Regression | Rapid double-click checkout | Rapidly double-click checkout for HD00000015; inspect alerts and SQL | Only one completed transaction; no duplicate financial records | Critical | One completion and in-progress alert; HD00000015 total/paid 50000, due 0; payments 1, cashbook 1 | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| REG-SALE-013-06-C | SALE-04, SALE-05 | UI / SQL / Regression | Normal debt collection | Collect CASH 1000 against HD00000008; reconcile invoice and payments | Debt reduces by 1000; one new payment and cashbook receipt | High | UI success; cumulative paid 78000, due 32000, PARTIALLY_PAID; latest payment id 22; payments 9, cashbook 9 | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| REG-SALE-013-06-D | SALE-04, SALE-05 | UI / SQL / Regression | Rapid double-click debt collection | Rapidly double-click CASH 1000 debt collection on HD00000008; inspect SQL | Only one payment and cashbook receipt created | Critical | One success message; cumulative paid 79000, due 31000; latest payment id 23; payments 10, cashbook 10 | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| REG-SALE-013-07-A | PAYMENT_CREATE | SQL / Security / Regression | Legacy RPC execution privilege revoked | Inspect function EXECUTE privileges for anon, authenticated, service_role | Legacy create_payment not executable by anon/authenticated; v2 permitted for authenticated | High | Legacy: anon=false, authenticated=false, service_role=true; v2: anon=false, authenticated=true, service_role=true | PASS | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
+| REG-SALE-013-07-B | PAYMENT_CREATE | API / Security | Direct call to legacy RPC denied | Use authorized test ADMIN JWT and call legacy create_payment RPC; inspect response | Legacy RPC execution denied; no financial writes | High | Direct Postman call intentionally skipped; no HTTP response recorded | NOT RUN / SKIPPED | DEF-SALE-013 | Chờ bổ sung | 2026-10-14; build not recorded |
 
-**Clarifications:** HD00000014 was a separate intentional zero-price service test, not the double-click payment fixture. Invoice 8 SQL counts are cumulative; REG-SALE-013-06-D adds only one payment and cashbook relative to 06-C. Original duplicate payment records 15/16 remain historical evidence.
+## Defect and scope notes
 
-**Residual coverage gaps:** direct legacy-RPC Postman denial not tested; frontend lost-response/timeout retry and invoice creation idempotency not verified. Do not mark these PASS or close DEF-SALE-013 solely from the observed cases.
+- Original REG-SALE-13 was **FAIL**: repeated legacy create_payment generated duplicate payment ids 15 and 16 and corresponding cashbook entries. This is historical defect evidence, not a successful retest.
+- Database migration added payments.idempotency_key, request_fingerprint, unique index; v2 returns existing payment for same key/payload and rejects changed payload. Legacy RPC EXECUTE privileges were revoked for anon/authenticated.
+- HD00000014 was a separate intentional zero-price service test, not the double-click fixture. Invoice 8 SQL counts are cumulative.
+- **Outstanding:** direct legacy-RPC denial test, lost-response/timeout retry, and invoice-creation idempotency. Do not close DEF-SALE-013 on these results alone.
+
+**Implementation references:** Frontend commits `054cfba02e11ed976b3051c38a5d361479b9d35e` and `d09f6428a4b7d561c38bbb0ead338ab9ff754b69` (historically recorded).
