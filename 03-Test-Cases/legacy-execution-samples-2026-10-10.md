@@ -1,71 +1,43 @@
-> **Archived historical snapshot (10 October 2026).** This is preserved for traceability. Some statuses, especially employee sync FAIL, were superseded by later retests. Consult the newer historical reports in this repository before citing results.
+> **Archived historical snapshot — 10 October 2026.** Results below are preserved as they were known then. In particular, employee-sync FAIL results may have been superseded by later fixes/retests. Do not present this table as the current system status.
 
-# Test Execution Samples — Spa POS
+# Spa POS — Legacy Execution Test Cases
 
-**Ngày tổng hợp:** 10/10/2026
+**Execution date:** 2026-10-10. **Build:** Not recorded. **Evidence:** Chờ bổ sung denotes no verified case-specific artifact in this historical file.
 
-## 1. Ca làm việc
+## Test case register
 
-| ID | Scenario | Kết quả đã ghi nhận | Status |
-|---|---|---|---|
-| TC-SHIFT-01 | Mở ca với tiền đầu ca hợp lệ | Mở ca với 1.000.000 thành công | PASS |
-| TC-SHIFT-02 | Mở ca lần nữa khi ca đang mở | Bị từ chối với SHIFT_ALREADY_OPEN | PASS |
-| TC-SHIFT-03 | Đóng ca với tiền thực tế khác số hệ thống | Tiền thực tế 900.000; chênh lệch -100.000 | PASS |
-| TC-SHIFT-04 | Mở ca với dữ liệu tiền không hợp lệ | API từ chối | PASS |
-| TC-SHIFT-05 | Đóng ca của người dùng khác | API trả FORBIDDEN | PASS cho kiểm tra quyền |
+| Test Case ID | Requirement ID | Test Type | Scenario | Steps / Test Data | Expected Result | Priority | Actual Result | Status | Defect ID | Evidence | Build / Date |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| TC-SHIFT-01 | SHIFT_OPEN | API / Functional | Mở ca với tiền đầu ca hợp lệ | Gửi yêu cầu mở ca, tiền đầu ca 1000000 | Mở ca thành công | High | Mở ca với 1000000 thành công | PASS | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-SHIFT-02 | SHIFT_OPEN | API / Negative | Mở ca trùng | Mở ca lần hai khi đang có ca mở | Từ chối mở ca trùng | High | SHIFT_ALREADY_OPEN | PASS | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-SHIFT-03 | SHIFT_CLOSE | API / Functional | Đóng ca có chênh lệch | Tiền hệ thống 1000000, thực tế 900000; đóng ca | Ghi nhận chênh lệch -100000 | High | Chênh lệch -100000 | PASS | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-SHIFT-04 | SHIFT_OPEN | API / Validation | Tiền đầu ca không hợp lệ | Gửi giá trị tiền đầu ca không hợp lệ | API từ chối | Medium | API từ chối; chưa ghi lại payload/status cụ thể | PASS | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-SHIFT-05 | SHIFT_CLOSE | API / Authorization | Không cho đóng ca của người khác | User B xác thực; cố đóng ca đang mở của User A; kiểm tra API và trạng thái ca | Từ chối; ca User A không thay đổi | Critical | API trả FORBIDDEN; chưa có đối chiếu đầy đủ trạng thái ca sau request | PASS (rule only) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMENT-01 | SALE-04, SALE-05 | API / Functional | Thanh toán đủ | Thanh toán 110000 trên hóa đơn 110000 | PAID; không còn nợ | High | Hóa đơn PAID | PASS | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMENT-02 | SALE-04, SALE-05 | API / Functional | Thanh toán một phần | Thanh toán 60000 trên tổng 110000 | PARTIALLY_PAID; còn nợ 50000 | High | PARTIALLY_PAID | PASS | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMENT-03 | SALE-04, SALE-05 | API / Functional | Thanh toán phần còn lại | Thanh toán tiếp 50000 | PAID; còn nợ 0 | High | Hóa đơn PAID | PASS | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMENT-04 | SALE-04 | API / Negative | Chặn thanh toán vượt nợ | Gửi số tiền lớn hơn số còn nợ | API từ chối, không ghi thanh toán sai | Critical | API từ chối; chưa có bằng chứng SQL sau request | PASS (rule only) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMENT-05 | SALE-04 | API / Negative | Chặn thanh toán bằng 0 | Gửi thanh toán 0 | API từ chối | High | API từ chối | PASS | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMENT-08 | INVOICE_CANCEL | API / Functional | Hủy hóa đơn chưa thanh toán | Gọi cancel_invoice trên hóa đơn chưa có payment | CANCELLED; không tạo payment/cashbook | High | CANCELLED; ghi nhận không có payment/cashbook | PASS | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMENT-09 | INVOICE_CANCEL | API / Negative | Chặn hủy hóa đơn đã thanh toán | Gọi cancel_invoice trên hóa đơn đã PAID | Từ chối; hóa đơn/payment/cashbook giữ nguyên | Critical | PAID_INVOICE_REQUIRES_REFUND_WORKFLOW; đối chiếu toàn vẹn dữ liệu chưa hoàn tất | PASS (rule only) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-CUSTOMER-01 | CUSTOMER_VIEW | Integration / Data | Đồng bộ khách hàng tải danh sách | Tải dữ liệu khách hàng từ nguồn cấu hình; kiểm tra danh sách | Hiển thị dữ liệu khách hàng đúng quy tắc | Medium | Nhóm TC-CUSTOMER-01..04 được báo PASS; không có actual riêng cho từng ID | PASS (reported) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-CUSTOMER-02 | CUSTOMER_VIEW | Integration / Data | Đồng bộ khách hàng ánh xạ mã/tên | Tải dữ liệu khách hàng từ nguồn cấu hình; kiểm tra mã/tên | Hiển thị dữ liệu khách hàng đúng quy tắc | Medium | Nhóm TC-CUSTOMER-01..04 được báo PASS; không có actual riêng cho từng ID | PASS (reported) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-CUSTOMER-03 | CUSTOMER_VIEW | Integration / Data | Đồng bộ khách hàng phone NULL | Tải dữ liệu khách hàng từ nguồn cấu hình; kiểm tra phone NULL | Hiển thị dữ liệu khách hàng đúng quy tắc | Medium | Nhóm TC-CUSTOMER-01..04 được báo PASS; không có actual riêng cho từng ID | PASS (reported) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-CUSTOMER-04 | CUSTOMER_VIEW | Integration / Data | Đồng bộ khách hàng không trộn dữ liệu mẫu | Tải dữ liệu khách hàng từ nguồn cấu hình; kiểm tra nguồn dữ liệu | Hiển thị dữ liệu khách hàng đúng quy tắc | Medium | Nhóm TC-CUSTOMER-01..04 được báo PASS; không có actual riêng cho từng ID | PASS (reported) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMETHOD-01 | SALE-04 | Integration / Data | Đồng bộ phương thức thanh toán 1 | Tải danh sách payment_methods và đối chiếu cấu hình | Hiển thị đúng phương thức thanh toán | Medium | Nhóm TC-PAYMETHOD-01..04 được báo PASS; không có actual riêng cho từng ID | PASS (reported) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMETHOD-02 | SALE-04 | Integration / Data | Đồng bộ phương thức thanh toán 2 | Tải danh sách payment_methods và đối chiếu cấu hình | Hiển thị đúng phương thức thanh toán | Medium | Nhóm TC-PAYMETHOD-01..04 được báo PASS; không có actual riêng cho từng ID | PASS (reported) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMETHOD-03 | SALE-04 | Integration / Data | Đồng bộ phương thức thanh toán 3 | Tải danh sách payment_methods và đối chiếu cấu hình | Hiển thị đúng phương thức thanh toán | Medium | Nhóm TC-PAYMETHOD-01..04 được báo PASS; không có actual riêng cho từng ID | PASS (reported) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-PAYMETHOD-04 | SALE-04 | Integration / Data | Đồng bộ phương thức thanh toán 4 | Tải danh sách payment_methods và đối chiếu cấu hình | Hiển thị đúng phương thức thanh toán | Medium | Nhóm TC-PAYMETHOD-01..04 được báo PASS; không có actual riêng cho từng ID | PASS (reported) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| DEF-PRODUCT-01 | PRODUCT_VIEW | Integration / Retest | Phân loại dịch vụ/hàng hóa | Kiểm tra phân loại và loại mặc định khi tạo sản phẩm | Loại sản phẩm ánh xạ đúng | Medium | Được báo PASS trong bản tổng hợp 10/10 | PASS (historical) | DEF-PRODUCT-01 | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-EMP-SYNC-01 | EMPLOYEE_VIEW | Integration / Data | Tải hồ sơ nhân viên | Mở Nhân sự → Hồ sơ; kiểm tra UI, Network, Console | Danh sách tải từ backend | High | Không tải/ánh xạ đúng trong snapshot 10/10 | FAIL (historical) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-EMP-SYNC-02 | EMPLOYEE_VIEW | Integration / Data | Ánh xạ mã/tên nhân viên | Kiểm tra mã và họ tên từ backend sang UI | Mã và tên hiển thị đúng | High | Ánh xạ không đúng trong snapshot 10/10 | FAIL (historical) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-EMP-SYNC-03 | EMPLOYEE_VIEW | Integration / Data | Ánh xạ trạng thái nhân viên | Kiểm tra trạng thái hoạt động | Trạng thái khớp backend | High | Trạng thái không khớp trong snapshot 10/10 | FAIL (historical) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
+| TC-EMP-SYNC-04 | EMPLOYEE_VIEW | Integration / Data | Tách hồ sơ khỏi tài khoản | Kiểm tra nhân viên không cần tài khoản đăng nhập | Hồ sơ nhân viên tồn tại độc lập | High | Không đáp ứng trong snapshot 10/10 | FAIL (historical) | — | Chờ bổ sung | 2026-10-10; historical snapshot |
 
-## 2. Thanh toán và hủy hóa đơn
+## Historical interpretation
 
-| ID | Scenario | Kết quả đã ghi nhận | Status |
-|---|---|---|---|
-| TC-PAYMENT-01 | Thanh toán đủ 110.000 | Hóa đơn chuyển PAID | PASS |
-| TC-PAYMENT-02 | Thanh toán 60.000 trên hóa đơn 110.000 | PARTIALLY_PAID | PASS |
-| TC-PAYMENT-03 | Thanh toán tiếp 50.000 | Hóa đơn chuyển PAID | PASS |
-| TC-PAYMENT-04 | Thanh toán vượt số còn phải trả | API từ chối | PASS |
-| TC-PAYMENT-05 | Thanh toán bằng 0 | API từ chối | PASS |
-| TC-PAYMENT-08 | Hủy hóa đơn chưa thanh toán | CANCELLED; đã ghi nhận không có payment/cashbook record | PASS |
-| TC-PAYMENT-09 | Hủy hóa đơn đã thanh toán | Bị chặn với PAID_INVOICE_REQUIRES_REFUND_WORKFLOW | Rule PASS; data integrity pending |
-
-Lưu ý TC-PAYMENT-09: quy tắc từ chối đã được xác nhận, nhưng cần hoàn tất đối chiếu invoice, payments và cashbook để kết luận về toàn vẹn dữ liệu.
-
-## 3. Đồng bộ dữ liệu nền
-
-| ID | Kiểm tra | Kết quả retest gần nhất |
-|---|---|---|
-| TC-CUSTOMER-01..04 | Tải khách hàng, ánh xạ mã/tên, phone NULL, không trộn dữ liệu mẫu | PASS |
-| TC-PAYMETHOD-01..04 | Tải phương thức thanh toán | PASS |
-| DEF-PRODUCT-01 | Phân loại dịch vụ/hàng hóa và loại mặc định khi thêm sản phẩm | PASS |
-| TC-EMP-SYNC-01 | Danh sách hồ sơ nhân viên tải được | FAIL |
-| TC-EMP-SYNC-02 | Ánh xạ mã và tên nhân viên | FAIL |
-| TC-EMP-SYNC-03 | Ánh xạ trạng thái hoạt động | FAIL |
-| TC-EMP-SYNC-04 | Tách hồ sơ nhân viên khỏi tài khoản đăng nhập | FAIL |
-
-## 4. Test case mẫu
-
-### TC-SHIFT-05 — Không cho đóng ca của người khác
-
-**Precondition:** User A có ca đang mở; User B đã xác thực nhưng không sở hữu ca đó.
-
-**Steps:**
-1. Xác thực bằng User B.
-2. Gửi request đóng ca với ID ca của User A.
-3. Kiểm tra status/response.
-4. Đối chiếu trạng thái ca ở backend.
-
-**Expected:** thao tác bị từ chối; ca của User A không bị thay đổi.
-
-**Actual đã ghi nhận:** API trả FORBIDDEN. Nên bổ sung evidence truy vấn trạng thái ca sau request vào hồ sơ hoàn chỉnh.
-
-### TC-EMP-SYNC-01 — Tải danh sách hồ sơ nhân viên
-
-**Steps:** mở Nhân sự → Hồ sơ; quan sát UI, Network và Console.
-
-**Expected:** danh sách được tải từ nguồn dữ liệu đã cấu hình và hiển thị các trường cần thiết.
-
-**Actual:** danh sách không tải/ánh xạ đúng trong lần retest gần nhất.
-
-**Status:** FAIL. Xem [Defect Log](defect-log.md).
-
-## Evidence checklist
-
-Lưu screenshot UI, request/response đã làm sạch, status code, kết quả query chỉ đọc, ngày kiểm thử, môi trường và phiên bản/commit. Không công khai token, khóa hoặc dữ liệu cá nhân.
+- TC-PAYMENT-09 confirms only the rejection rule; post-request invoice/payment/cashbook integrity was not fully reconciled.
+- TC-SHIFT-05 returned FORBIDDEN; additional evidence of unchanged shift state was recommended.
+- TC-EMP-SYNC-01..04 reflect **historical FAIL**, not the most recent status after subsequent development.
+- Grouped customer and payment-method cases were expanded into individual rows for consistent formatting; their case-specific steps/results were not recovered and should be verified before treating these as complete detailed test cases.
+- Do not publish secrets, tokens or unredacted personal data in Evidence.
