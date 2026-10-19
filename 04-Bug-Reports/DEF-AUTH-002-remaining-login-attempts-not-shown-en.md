@@ -1,37 +1,56 @@
 # DEF-AUTH-002 — Remaining login attempts not displayed
 
+## Defect details
+
 | Field | Value |
-|---|---|
-| Project | Spa POS |
+| --- | --- |
+| Defect ID | DEF-AUTH-002 |
+| Project | Spa POS (web demo) |
 | Module | Authentication / Login |
-| Requirement | AUTH-01 |
-| Test case | AUTH-VAL-04 |
-| Type | Validation feedback / Requirement compliance |
-| Severity | Minor (proposed) |
-| Priority | Medium (proposed) |
+| Related requirement | AUTH-01 |
+| Related test case | [AUTH-VAL-04](../03-Test-Cases/authentication-ui-validation-en.md) |
+| Defect type | Functional / Validation feedback |
+| Severity | Minor (proposed; pending triage) |
+| Priority | Medium (proposed; pending triage) |
 | Status | OPEN |
-| Date | 2026-10-14 |
-| Environment | Spa POS web; browser and build not recorded |
-| Evidence | Tester screenshot: image(10).png (conversation attachment; not yet uploaded to repository) |
-| Retest | NOT RUN |
+| Detected on | 2026-10-14 |
+| Last reproduction | 2026-10-14 |
+| Environment | Spa POS web; browser version and build SHA not recorded |
+| Assigned to | Unassigned / not recorded |
+| Retest status | NOT RUN — no confirmed fix |
+| Evidence | [AUTH-VAL-04-invalid-password.png](../11-Test-Execution-Evidence/01-Authentication/AUTH-VAL-04-invalid-password.png) |
+
+## Preconditions
+
+Logged-out test session. Use an authorized disposable account for repeated failures.
 
 ## Steps to reproduce
-1. Open the login screen in a logged-out state.
+
+1. Open the login page.
 2. Enter test username `abc123` and an invalid test password.
-3. Click Login once.
-4. Observe the validation feedback and remaining attempt count.
+3. Click Login and inspect the error and remaining-attempt indicator.
 
 ## Expected result
-Reject invalid credentials, show a generic invalid-credentials message without disclosing which field is wrong, and display the number of remaining login attempts per AUTH-01.
+
+Login is rejected with a generic invalid-credentials message **and** an accurate remaining-attempt count per AUTH-01.
 
 ## Actual result
-The login is rejected; the generic message “Tên đăng nhập hoặc mật khẩu không đúng.” is shown and the Password field is outlined red. **The remaining login attempts are not displayed.**
 
-## Impact
-The login screen fails to provide required feedback about remaining attempts. This does not establish that lockout or attempt counting is broken; test AUTH-VAL-07 separately.
+Login was rejected; message **“Tên đăng nhập hoặc mật khẩu không đúng.”** appeared with red password outline. No remaining-attempt count was shown.
 
-## Suggested fix
-Show a remaining-attempt counter after failed login in a manner consistent with server-side lockout state. Avoid revealing whether the username exists. Confirm AUTH-02 lockout rules and retest.
+## Impact / Risk
 
-## Retest criteria
-After an invalid login, the generic error and accurate remaining-attempt count appear. Verify successive failures and lockout with an isolated test account. Capture screenshot and build identifier.
+Required feedback is missing. This defect is separate from server-side lockout enforcement (DEF-AUTH-003).
+
+## Suggested investigation / fix
+
+Display a reliable remaining-attempt count consistent with backend lockout state, without revealing account existence.
+
+## Retest / Exit criteria
+
+After implementation, verify successive failures update the count correctly; coordinate with AUTH-VAL-07 lockout retest.
+
+## Evidence and limitations
+
+Screenshot shows the visible error state, not the full attempt history.
+
