@@ -38,3 +38,7 @@ Inspect the authentication flow and server-side enforcement of failed-attempt tr
 
 ## Retest criteria
 With an isolated test account and confirmed clean counter, attempts 1–4 are rejected; attempt 5 activates a 15-minute lock; correct and incorrect passwords remain blocked during the lock; countdown is visible; after expiration, valid credentials work. Capture timestamps, network responses and build version without exposing secrets.
+
+## Additional reproduction — 19 October 2026
+
+A new manual execution was reported: six consecutive invalid-password attempts showed the same generic error, followed by successful login with the correct password on attempt seven and redirection to the Dashboard. **Result: FAIL / REPRODUCED; defect remains OPEN.** This is a new observation, separate from the original 14 October attempt sequence above. Screenshot filenames are recorded in [the Authentication evidence register](../11-Test-Execution-Evidence/01-Authentication/README.md), but PNG upload is pending. The count of failed attempts is based on tester notes; the screenshots do not show a counter or full attempt history. No fix retest was performed.
