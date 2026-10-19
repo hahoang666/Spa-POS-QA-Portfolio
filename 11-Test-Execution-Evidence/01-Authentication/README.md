@@ -34,3 +34,15 @@
 ## Evidence naming and destination
 
 Upload the six PNGs to `11-Test-Execution-Evidence/01-Authentication/`. This register can then be updated to link directly to committed image paths. Do not treat application UI screenshots in `10-Screenshots/` as test-execution proof by themselves.
+
+## AUTH-VAL-13 — Browser storage verification (19 October 2026)
+
+**Status: PASS (browser-side scope).** Tester confirmed all three DevTools screenshots were captured **after logout**.
+
+| Evidence filename (pending upload verification) | Observation |
+| --- | --- |
+| `AUTH-VAL-13-01-local-storage-after-logout.png` | Local Storage has application counters/preferences and `spa_pos_remember_username`; no visible Supabase `sb-...-auth-token` key |
+| `AUTH-VAL-13-02-session-storage-after-logout.png` | Session Storage is empty |
+| `AUTH-VAL-13-03-cookies-after-logout.png` | Cookies list is empty |
+
+The tester additionally inspected `spa_pos_state_v1` and reported no `password`, `access_token`, or `refresh_token` values. This last point is a tester-reported inspection, not directly visible in the screenshots. **Scope limitation:** Browser storage verification does not prove server-side token revocation, absence of credentials in all possible locations, or other session security guarantees. Do not upload token values or passwords.
