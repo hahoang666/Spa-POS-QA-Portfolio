@@ -43,3 +43,16 @@ For execution results, defect details, and retest evidence, refer to the relevan
 **Status:** The image files above are prepared locally for manual upload; the README update does not mean PNGs have been committed to GitHub.
 
 **QA observation:** In the employee-profile screenshot, a record named `QA Tester Inactive` appears with status `Hoạt động` (Active). This is a point for further verification, not a confirmed defect. The ledger report in screenshot 20 displays zeros; reconcile the report period and data source before drawing a conclusion.
+
+## Administration and settings screens (21–24)
+
+| No. | Planned image filename | Screen | What the screenshot shows |
+| --- | --- | --- | --- |
+| 21 | `21-seller-profile.png` | Seller profile | Demo electronic-invoice seller information form and required fields |
+| 22 | `22-account-management.png` | Account management | User accounts, roles, account status, linked employee profiles and account actions |
+| 23 | `23-user-permissions.png` | User permissions | User role, assigned permission count and permission-management action |
+| 24 | `24-activity-log.png` | Activity log | Audit log table and its current empty state |
+
+**Upload status:** PNG files 21–24 have been prepared in a ZIP for manual upload. The PNG binaries are not yet committed to this repository.
+
+**QA notes:** The seller-profile screen explicitly identifies the electronic-invoice details as demo data and not connected to the tax authority. The activity-log screenshot shows an empty state; this alone does not establish a logging defect. Account-management screenshots expose internal account IDs and test email addresses; review and redact as needed before public sharing.
