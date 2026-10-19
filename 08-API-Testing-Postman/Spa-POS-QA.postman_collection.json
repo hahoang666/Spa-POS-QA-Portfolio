@@ -1,0 +1,888 @@
+{
+  "info": {
+    "name": "Spa POS — Historical RPC QA (Sanitized Template)",
+    "description": "Reconstructed from historical QA chats and repo. NOT an original Postman export; NOT re-executed. Mutating requests affect your database. Use dedicated disposable QA fixtures. Never commit secrets or tokens.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Authentication",
+      "description": "Login requires publishable/anon key and real credentials stored only locally.",
+      "item": [
+        {
+          "name": "Login — password grant (template)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/auth/v1/token?grant_type=password",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ADMIN_EMAIL}}\",\n  \"password\": \"{{ADMIN_PASSWORD}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical login returned 200. Do not export live credentials or tokens."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  "pm.test(\"Has access token\",()=>pm.expect(pm.response.json()).to.have.property(\"access_token\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Shift RPC",
+      "description": "Shift signature historically p_shift_id + p_actual_cash; verify deployment.",
+      "item": [
+        {
+          "name": "Open shift — TC-SHIFT-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/open_shift",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "open_shift"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_opening_cash\": 1000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical PASS. Opens shift and changes DB; do not run on an existing open shift.\nWARNING: Mutates shifts. Execute only with isolated QA account."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get current shift — historical",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/get_current_shift",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "get_current_shift"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Read current shift; verify response body against SQL. Historical 200 reported."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Open shift duplicate — TC-SHIFT-02",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/open_shift",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "open_shift"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_opening_cash\": 1000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical duplicate rejection 409 / 23505. Requires already OPEN shift."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(409); });",
+                  "pm.test(\"SQLSTATE\",()=>pm.expect(pm.response.json().code).to.eql(\"23505\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Open shift negative — TC-SHIFT-03",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/open_shift",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "open_shift"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_opening_cash\": -1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical 400 / 22023."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(400); });",
+                  "pm.test(\"SQLSTATE\",()=>pm.expect(pm.response.json().code).to.eql(\"22023\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Close shift — historical",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/close_shift",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "close_shift"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_shift_id\": \"{{TEST_SHIFT_ID}}\",\n  \"p_actual_cash\": 900000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical shift close / variance checks. Signature may differ by deployed migration; inspect pg_proc before running.\nWARNING: Mutates shift; confirm current RPC signature and expected cash."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Close already closed — DEF-SHIFT-001 retest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/close_shift",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "close_shift"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_shift_id\": \"{{TEST_SHIFT_ID}}\",\n  \"p_actual_cash\": 900000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical 409 / 23505 / SHIFT_NOT_OPEN after fix."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(409); });",
+                  "pm.test(\"SQLSTATE\",()=>pm.expect(pm.response.json().code).to.eql(\"23505\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Payments RPC",
+      "description": "Check invoice/payment/cashbook SQL after each request. v2 has an additional UUID idempotency key.",
+      "item": [
+        {
+          "name": "Full CASH payment — historical",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/create_payment",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "create_payment"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_invoice_id\": \"{{TEST_INVOICE_ID}}\",\n  \"p_payment_method_id\": 1,\n  \"p_amount\": 110000,\n  \"p_reference_no\": \"TC-PAYMENT-01\",\n  \"p_notes\": \"QA historical example\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical 200; PAID after DB reconciliation.\nWARNING: Legacy create_payment EXECUTE may be revoked. Do not use without verifying current permissions."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Partial CASH payment — historical",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/create_payment",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "create_payment"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_invoice_id\": \"{{TEST_INVOICE_ID}}\",\n  \"p_payment_method_id\": 1,\n  \"p_amount\": 60000,\n  \"p_reference_no\": \"TC-PAYMENT-03\",\n  \"p_notes\": \"QA historical example\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical 200; PARTIALLY_PAID. Legacy RPC may be revoked.\nWARNING: Mutates payments/cashbook; use disposable invoice."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reject zero amount — historical",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/create_payment",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "create_payment"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_invoice_id\": \"{{TEST_INVOICE_ID}}\",\n  \"p_payment_method_id\": 1,\n  \"p_amount\": 0,\n  \"p_reference_no\": \"TC-PAYMENT-06\",\n  \"p_notes\": \"Negative validation\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical 400 / 22023. Legacy RPC may be revoked."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(400); });",
+                  "pm.test(\"SQLSTATE\",()=>pm.expect(pm.response.json().code).to.eql(\"22023\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "V2 payment — first key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/create_payment_v2",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "create_payment_v2"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_invoice_id\": \"{{TEST_INVOICE_ID}}\",\n  \"p_payment_method_id\": 1,\n  \"p_amount\": 1000,\n  \"p_reference_no\": \"RETEST-SALE-013-01\",\n  \"p_notes\": \"Idempotency QA\",\n  \"p_idempotency_key\": \"{{IDEMPOTENCY_KEY}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical first call created payment id 17 on invoice 8. Must supply a NEW UUID and disposable unpaid invoice.\nWARNING: Creates a real payment. Do not use historical invoice 8 in current DB."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "V2 payment — same key same payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/create_payment_v2",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "create_payment_v2"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_invoice_id\": \"{{TEST_INVOICE_ID}}\",\n  \"p_payment_method_id\": 1,\n  \"p_amount\": 1000,\n  \"p_reference_no\": \"RETEST-SALE-013-01\",\n  \"p_notes\": \"Idempotency QA\",\n  \"p_idempotency_key\": \"{{IDEMPOTENCY_KEY}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical returned same payment; no extra payment/cashbook. Run only after first-key call."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "V2 conflict — same key different amount",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/create_payment_v2",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "create_payment_v2"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_invoice_id\": \"{{TEST_INVOICE_ID}}\",\n  \"p_payment_method_id\": 1,\n  \"p_amount\": 2000,\n  \"p_reference_no\": \"RETEST-SALE-013-01\",\n  \"p_notes\": \"Idempotency QA\",\n  \"p_idempotency_key\": \"{{IDEMPOTENCY_KEY}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical 409 / 23505 / IDEMPOTENCY_KEY_CONFLICT."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(409); });",
+                  "pm.test(\"SQLSTATE\",()=>pm.expect(pm.response.json().code).to.eql(\"23505\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Invoice cancellation",
+      "description": "Paid invoices require refund workflow, not direct cancellation.",
+      "item": [
+        {
+          "name": "Cancel nonexistent invoice — TC-PAYMENT-13",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/cancel_invoice",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "cancel_invoice"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_invoice_id\": 999999,\n  \"p_cancel_reason\": \"TC-PAYMENT-13-NOT-EXIST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Historical retest 400 / 22023 / INVOICE_NOT_FOUND."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(400); });",
+                  "pm.test(\"SQLSTATE\",()=>pm.expect(pm.response.json().code).to.eql(\"22023\"));pm.test(\"Message\",()=>pm.expect(pm.response.json().message).to.eql(\"INVOICE_NOT_FOUND\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel unpaid invoice — historical",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{SUPABASE_API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{ACCESS_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{SUPABASE_URL}}/rest/v1/rpc/cancel_invoice",
+              "host": [
+                "{{SUPABASE_URL}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "cancel_invoice"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_invoice_id\": \"{{TEST_INVOICE_ID}}\",\n  \"p_cancel_reason\": \"QA-CANCEL-UNPAID\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Expected CANCELLED; historical reported success. Use disposable unpaid invoice.\nWARNING: Mutates invoice; must verify shift/permission and invoice state."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Expected HTTP status\", function () { pm.expect(pm.response.code).to.eql(200); });",
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
