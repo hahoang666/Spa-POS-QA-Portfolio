@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "description": "Historical reconstructed API observations; NOT raw Postman capture; all example data are non-secret.",
+    "period": "2026-10-08 through 2026-10-14",
+    "source": "QA chats and GitHub test registers"
+  },
+  "examples": [
+    {
+      "id": "TC-SHIFT-01",
+      "method": "POST",
+      "path": "/rest/v1/rpc/open_shift",
+      "request": {
+        "p_opening_cash": 1000000
+      },
+      "observed": {
+        "http_status": 200,
+        "description": "Shift opened successfully; full response not retained."
+      }
+    },
+    {
+      "id": "TC-SHIFT-02",
+      "method": "POST",
+      "path": "/rest/v1/rpc/open_shift",
+      "request": {
+        "p_opening_cash": 1000000
+      },
+      "observed": {
+        "http_status": 409,
+        "sqlstate": "23505",
+        "description": "Duplicate open shift rejected."
+      }
+    },
+    {
+      "id": "TC-SHIFT-03",
+      "method": "POST",
+      "path": "/rest/v1/rpc/open_shift",
+      "request": {
+        "p_opening_cash": -1
+      },
+      "observed": {
+        "http_status": 400,
+        "sqlstate": "22023"
+      }
+    },
+    {
+      "id": "DEF-SHIFT-001",
+      "method": "POST",
+      "path": "/rest/v1/rpc/close_shift",
+      "request": {
+        "p_shift_id": "<CLOSED_TEST_SHIFT_ID>",
+        "p_actual_cash": 900000
+      },
+      "before_fix": {
+        "http_status": 500,
+        "sqlstate": "55000",
+        "message": "SHIFT_NOT_OPEN"
+      },
+      "after_fix": {
+        "http_status": 409,
+        "sqlstate": "23505",
+        "message": "SHIFT_NOT_OPEN"
+      }
+    },
+    {
+      "id": "TC-PAYMENT-03",
+      "method": "POST",
+      "path": "/rest/v1/rpc/create_payment",
+      "request": {
+        "p_invoice_id": 3,
+        "p_payment_method_id": 1,
+        "p_amount": 60000,
+        "p_reference_no": null,
+        "p_notes": "TC-PAYMENT-03-PARTIAL"
+      },
+      "observed": {
+        "http_status": 200,
+        "payment_id": 3,
+        "amount": 60000,
+        "invoice_status": "PARTIALLY_PAID",
+        "invoice_due": 50000
+      }
+    },
+    {
+      "id": "TC-PAYMENT-13",
+      "method": "POST",
+      "path": "/rest/v1/rpc/cancel_invoice",
+      "request": {
+        "p_invoice_id": 999999,
+        "p_cancel_reason": "TC-PAYMENT-13-NOT-EXIST"
+      },
+      "before_fix": {
+        "http_status": 500,
+        "sqlstate": "P0002",
+        "message": "INVOICE_NOT_FOUND"
+      },
+      "after_fix": {
+        "http_status": 400,
+        "sqlstate": "22023",
+        "message": "INVOICE_NOT_FOUND"
+      }
+    },
+    {
+      "id": "RETEST-SALE-013-02",
+      "method": "POST",
+      "path": "/rest/v1/rpc/create_payment_v2",
+      "request": {
+        "p_invoice_id": 8,
+        "p_payment_method_id": 1,
+        "p_amount": 1000,
+        "p_idempotency_key": "<SAME_TEST_UUID>"
+      },
+      "observed": {
+        "http_status": 200,
+        "payment_id": 17,
+        "description": "Same key and same payload returned existing payment, no additional records."
+      }
+    },
+    {
+      "id": "RETEST-SALE-013-03",
+      "method": "POST",
+      "path": "/rest/v1/rpc/create_payment_v2",
+      "request": {
+        "p_invoice_id": 8,
+        "p_payment_method_id": 1,
+        "p_amount": 2000,
+        "p_idempotency_key": "<SAME_TEST_UUID>"
+      },
+      "observed": {
+        "http_status": 409,
+        "sqlstate": "23505",
+        "message": "IDEMPOTENCY_KEY_CONFLICT"
+      }
+    },
+    {
+      "id": "REG-SALE-013-05",
+      "method": "POST",
+      "path": "/rest/v1/rpc/create_payment_v2",
+      "request": {
+        "p_invoice_id": 8,
+        "p_payment_method_id": 1,
+        "p_amount": 1000,
+        "p_idempotency_key": "<TEST_UUID>"
+      },
+      "observed": {
+        "http_status": 403,
+        "sqlstate": "42501",
+        "message": "FORBIDDEN: missing permission PAYMENT_CREATE"
+      }
+    }
+  ]
+}
